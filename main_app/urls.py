@@ -120,7 +120,42 @@ urlpatterns = [
     path('staff/grade_submission/<int:submission_id>/', staff_views.staff_grade_submission, name='staff_grade_submission'),
     path('toggle_assignment_status/<int:assignment_id>/', staff_views.toggle_assignment_status, name='toggle_assignment_status'),
 
+    # STAFF GOOGLE COLAB URLS
+    path('staff/colab-notebooks/', staff_views.staff_colab_notebooks, name='staff_colab_notebooks'),
+    path('staff/add-colab-notebook/', staff_views.staff_add_colab_notebook, name='staff_add_colab_notebook'),
+    path('staff/edit-colab-notebook/<int:notebook_id>/', staff_views.staff_edit_colab_notebook, name='staff_edit_colab_notebook'),
+    path('staff/delete-colab-notebook/<int:notebook_id>/', staff_views.staff_delete_colab_notebook, name='staff_delete_colab_notebook'),
+    path('staff/view-student-progress/<int:notebook_id>/', staff_views.staff_view_student_progress, name='staff_view_student_progress'),
 
+    # STUDENT MESSAGING URLS
+    path('student/inbox/', student_views.student_inbox, name="student_inbox"),
+    path('student/sent_messages/', student_views.student_sent_messages, name="student_sent_messages"),
+    path('student/compose_message/', student_views.student_compose_message, name="student_compose_message"),
+    path('student/view_message/<int:message_id>/', student_views.student_view_message, name="student_view_message"),
+
+    # STUDENT FORUM URLS
+    path('student/forum/', student_views.student_forum_categories, name="student_forum_categories"),
+    path('student/forum/category/<int:category_id>/', student_views.student_forum_topics, name="student_forum_topics"),
+    path('student/forum/topic/<int:topic_id>/', student_views.student_forum_topic_detail, name="student_forum_topic_detail"),
+    path('student/forum/category/<int:category_id>/new_topic/', student_views.student_create_topic, name="student_create_topic"),
+
+    # STUDENT GOOGLE COLAB URLS
+    path('student/colab-notebooks/', student_views.student_colab_notebooks, name='student_colab_notebooks'),
+    path('student/view-colab-notebook/<int:notebook_id>/', student_views.student_view_colab_notebook, name='student_view_colab_notebook'),
+    path('student/update-colab-progress/<int:notebook_id>/', student_views.student_update_colab_progress, name='student_update_colab_progress'),
+
+    # STAFF MESSAGING URLS
+    path('staff/inbox/', staff_views.staff_inbox, name="staff_inbox"),
+    path('staff/sent_messages/', staff_views.staff_sent_messages, name="staff_sent_messages"),
+    path('staff/compose_message/', staff_views.staff_compose_message, name="staff_compose_message"),
+    path('staff/view_message/<int:message_id>/', staff_views.staff_view_message, name="staff_view_message"),
+
+    # STAFF FORUM URLS
+    path('staff/forum/', staff_views.staff_forum_categories, name="staff_forum_categories"),
+    path('staff/forum/category/<int:category_id>/', staff_views.staff_forum_topics, name="staff_forum_topics"),
+    path('staff/forum/topic/<int:topic_id>/', staff_views.staff_forum_topic_detail, name="staff_forum_topic_detail"),
+    path('staff/forum/category/<int:category_id>/new_topic/', staff_views.staff_create_topic, name="staff_create_topic"),
+    path('staff/forum/manage_categories/', staff_views.staff_manage_forum_category, name="staff_manage_forum_category"),
 
     # Student
     path("student/home/", student_views.student_home, name='student_home'),

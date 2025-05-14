@@ -1,0 +1,137 @@
+{% extends 'staff_template/staff_base.html' %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Gestion des exercices Google Colab</h3>
+                <div class="float-right">
+                    <a href="{% url 'staff_add_colab_notebook' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Ajouter un exercice
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-info">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> Les exercices Google Colab permettent aux étudiants de pratiquer l'IA et la data science directement dans leur navigateur.
+                </div>
+
+                {% if notebooks %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Module</th>
+                            <th>Difficulté</th>
+                            <th>Temps estimé</th>
+                            <th>Date de création</th>
+                            <th>Visibilité</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notebook in notebooks %}
+                        <tr>
+                            <td>{{ notebook.title }}</td>
+                            <td>{{ notebook.subject.name }}</td>
+                            <td>
+                                <span class="badge badge-{% if notebook.difficulty == 'beginner' %}success{% elif notebook.difficulty == 'intermediate' %}warning{% else %}danger{% endif %}">
+                                    {{ notebook.get_difficulty_display }}
+                                </span>
+                            </td>
+                            <td>{{ notebook.estimated_time }} minutes</td>
+                            <td>{{ notebook.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if notebook.is_visible %}
+                                <span class="badge badge-success">Visible</span>
+                                {% else %}
+                                <span class="badge badge-secondary">Masqué</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'staff_view_student_progress' notebook.id %}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-chart-line"></i> Progression
+                                    </a>
+                                    <a href="{% url 'staff_edit_colab_notebook' notebook.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <a href="#" class="btn btn-danger btn-sm delete-notebook" data-id="{{ notebook.id }}" data-title="{{ notebook.title }}">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fa fa-exclamation-triangle"></i> Vous n'avez pas encore créé d'exercices Google Colab.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation pour la suppression -->
+<div class="modal fade" id="deleteNotebookModal" tabindex="-1" role="dialog" aria-labelledby="deleteNotebookModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteNotebookModalLabel">Supprimer l'exercice</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'exercice <strong id="notebookTitle"></strong> ?</p>
+                <p class="text-danger">Cette action est irréversible !</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <a href="#" id="confirmDelete" class="btn btn-danger">Supprimer</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        $('.table').DataTable({
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/French.json"
+            }
+        });
+        
+        // Gestion du modal de confirmation pour la suppression
+        $('.delete-notebook').click(function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var title = $(this).data('title');
+            
+            $('#notebookTitle').text(title);
+            $('#confirmDelete').attr('href', "{% url 'staff_delete_colab_notebook' 0 %}".replace('0', id));
+            $('#deleteNotebookModal').modal('show');
+        });
+    });
+</script>
+{% endblock %} 

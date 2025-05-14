@@ -1,0 +1,172 @@
+{% extends 'student_template/student_base.html' %}
+{% load custom_filters %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ notebook.title }}</h3>
+                <div class="float-right">
+                    <a href="{% url 'student_colab_notebooks' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-info">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="alert alert-primary">
+                            <h5><i class="fas fa-info-circle"></i> À propos de cet exercice</h5>
+                            <p>{{ notebook.description }}</p>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Module :</strong> {{ notebook.subject.name }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Difficulté :</strong> 
+                                    <span class="badge badge-{% if notebook.difficulty == 'beginner' %}success{% elif notebook.difficulty == 'intermediate' %}warning{% else %}danger{% endif %}">
+                                        {{ notebook.get_difficulty_display }}
+                                    </span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Temps estimé :</strong> {{ notebook.estimated_time }} minutes
+                                </div>
+                            </div>
+                            {% if notebook.keywords %}
+                            <div class="mt-2">
+                                <strong>Mots-clés :</strong> 
+                                {% for keyword in notebook.keywords.split|slice:':5' %}
+                                <span class="badge badge-info">{{ keyword }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="m-0">Votre progression</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar progress-bar-striped {% if progress.is_completed %}bg-success{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ progress.progress_percent }}%;" 
+                                         aria-valuenow="{{ progress.progress_percent }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ progress.progress_percent|floatformat:0 }}%
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center">
+                                    {% if progress.is_completed %}
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> Exercice complété !
+                                        {% if progress.completed_date %}
+                                        <br><small>Terminé le {{ progress.completed_date|date:"d/m/Y à H:i" }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <form method="post" action="{% url 'student_update_colab_progress' notebook.id %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="progress_percent">Mettre à jour votre progression :</label>
+                                        <input type="range" class="form-control-range" id="progress_percent" name="progress_percent" 
+                                               value="{{ progress.progress_percent }}" min="0" max="100" step="5">
+                                        <small class="form-text text-muted">
+                                            <span id="progress_value">{{ progress.progress_percent|floatformat:0 }}</span>% complété
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="is_completed" name="is_completed" value="true" {% if progress.is_completed %}checked{% endif %}>
+                                            <label class="custom-control-label" for="is_completed">Marquer comme terminé</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="notes">Notes personnelles :</label>
+                                        <textarea class="form-control" id="notes" name="notes" rows="3">{{ progress.notes }}</textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-save"></i> Enregistrer la progression
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="m-0"><i class="fab fa-google"></i> Google Colab Notebook</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="embed-responsive embed-responsive-16by9" style="min-height: 600px;">
+                                    <iframe class="embed-responsive-item" src="{{ notebook.colab_url }}" allowfullscreen></iframe>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <a href="{{ notebook.colab_url }}" target="_blank" class="btn btn-warning">
+                                        <i class="fas fa-external-link-alt"></i> Ouvrir dans un nouvel onglet
+                                    </a>
+                                    <small class="text-muted ml-2">
+                                        Si l'intégration ne fonctionne pas correctement, utilisez ce bouton pour ouvrir le notebook dans un nouvel onglet.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        // Mise à jour de l'affichage de la progression
+        $('#progress_percent').on('input', function() {
+            $('#progress_value').text(Math.round($(this).val()));
+        });
+        
+        // Si on marque comme terminé, on met la progression à 100%
+        $('#is_completed').change(function() {
+            if($(this).is(':checked')) {
+                $('#progress_percent').val(100);
+                $('#progress_value').text('100');
+            }
+        });
+        
+        // Si on change la progression à 100%, on coche automatiquement "terminé"
+        $('#progress_percent').change(function() {
+            if($(this).val() == 100) {
+                $('#is_completed').prop('checked', true);
+            }
+        });
+    });
+</script>
+{% endblock %} 

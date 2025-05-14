@@ -17,12 +17,12 @@
                     <div class="table card-body">
                         <table class="table table-bordered">
                             <tr>
-                                <th>SN</th>
-                                <th>Staff</th>
-                                <th>Course</th>
+                                <th>No</th>
+                                <th>Professeur</th>
+                                <th>Filière</th>
                                 <th>Message</th>
-                                <th>Leave Date</th>
-                                <th>Submitted On</th>
+                                <th>Date de Congé</th>
+                                <th>Soumise le</th>
                                 <th>Action</th>
 
                             </tr>
@@ -37,11 +37,11 @@
                                  
                                       
                                       {% if leave.status == 0 %}
-                                           <td> <button data-toggle = "modal" data-target = "#reply_modal" value="{{leave.id}}" class="btn btn-primary reply_open_modal">Reply</button>
+                                           <td> <button data-toggle = "modal" data-target = "#reply_modal" value="{{leave.id}}" class="btn btn-primary reply_open_modal">Répondre</button>
 {% elif leave.status == -1 %}
-<td><span  class='badge badge-danger'>Rejected</span></td>
+<td><span  class='badge badge-danger'>Refusée</span></td>
 {% else %}
-<td><span  class='badge badge-success'>Approved</span></td>
+<td><span  class='badge badge-success'>Approuvée</span></td>
 
                                             <td>{{feedback.updated_at}}</td>
                                       {% endif %}
@@ -77,20 +77,20 @@
          
          <div class = "modal-body">
              <input type="hidden"  id="id">
-           <p> Reply To <span id="reply_name"></span>'s Leave Request</p>  
+           <p> Répondre à la demande de congé de <span id="reply_name"></span></p>  
            <select id="reply_leave_status" class="form-control">
-<option value="">-- Select --</option>
-<option value="1">Approve</option>
-<option value="-1">Reject</option>
+<option value="">-- Sélectionner --</option>
+<option value="1">Approuver</option>
+<option value="-1">Refuser</option>
            </select>
         </div>
         
         <div class = "modal-footer">
             <button type = "button" class = "btn btn-default" data-dismiss = "modal">
-                Close
+                Fermer
             </button>
             
-            <button id="reply_btn" class="btn btn-success btn-block">Submit</button>
+            <button id="reply_btn" class="btn btn-success btn-block">Soumettre</button>
          
          </div>
          
@@ -125,16 +125,16 @@
         }
     }).done(function(response){
         if (response == "True"){
-            alert("Leave Response Has Been Saved!")
+            alert("La réponse à la demande de congé a été enregistrée !")
             location.reload()
         }else{
-            alert("Reply Could Not Be Sent")
+            alert("La réponse n'a pas pu être envoyée")
         }
     }).fail(function(response){
-        alert("Error Occured. ")
+        alert("Une erreur est survenue.")
     })
 }else{
-    alert("Choose valid response")
+    alert("Veuillez choisir une réponse valide")
 }
 
           })

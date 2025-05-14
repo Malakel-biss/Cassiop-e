@@ -14,7 +14,7 @@
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
 
-                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Update Profile"%}
+                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Mettre à jour le profil"%}
                 </div>
                 <!-- /.card -->
 
@@ -31,7 +31,7 @@
           $("#id_password").on("change", function(){
               if (!ifNotfied){
                 ifNotfied = true;
-                alert("After a successful profile update:\n\nYour session would be terminated\nYou would be required to login again")
+                alert("Après une mise à jour réussie du profil :\n\nVotre session sera terminée\nVous devrez vous reconnecter")
               }
           })
       })

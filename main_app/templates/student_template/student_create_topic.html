@@ -1,0 +1,59 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-plus mr-2"></i>Créer un nouveau sujet dans "{{ category.name }}"
+                        </h3>
+                        <div class="card-tools">
+                            <a href="{% url 'student_forum_topics' category.id %}" class="btn btn-default btn-sm">
+                                <i class="fas fa-arrow-left"></i> Retour aux sujets
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="title">Titre du sujet</label>
+                                <input type="text" class="form-control" id="title" name="title" placeholder="Entrez le titre du sujet" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="content">Contenu</label>
+                                <textarea class="form-control" id="content" name="content" rows="10" placeholder="Décrivez votre sujet en détail..." required></textarea>
+                            </div>
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Créer le sujet
+                                </button>
+                                <a href="{% url 'student_forum_topics' category.id %}" class="btn btn-default">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    $(function() {
+        // Ajout de l'éditeur de texte riche si disponible
+        if (typeof CKEDITOR !== 'undefined') {
+            CKEDITOR.replace('content');
+        }
+    });
+</script>
+{% endblock custom_js %} 

@@ -7,6 +7,7 @@ from django.shortcuts import (HttpResponseRedirect, get_object_or_404,redirect, 
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
 
 from .forms import *
 from .models import *
@@ -29,7 +30,7 @@ def staff_home(request):
         subject_list.append(subject.name)
         attendance_list.append(attendance_count)
     context = {
-        'page_title': 'Staff Panel - ' + str(staff.admin.last_name) + ' (' + str(staff.course) + ')',
+        'page_title': 'Tableau de Bord - ' + str(staff.admin.last_name) + ' (' + str(staff.course) + ')',
         'total_students': total_students,
         'total_attendance': total_attendance,
         'total_leave': total_leave,
@@ -47,7 +48,7 @@ def staff_take_attendance(request):
     context = {
         'subjects': subjects,
         'sessions': sessions,
-        'page_title': 'Take Attendance'
+        'page_title': 'Prendre la Présence'
     }
 
     return render(request, 'staff_template/staff_take_attendance.html', context)
@@ -113,7 +114,7 @@ def staff_update_attendance(request):
     context = {
         'subjects': subjects,
         'sessions': sessions,
-        'page_title': 'Update Attendance'
+        'page_title': 'Mettre à Jour la Présence'
     }
 
     return render(request, 'staff_template/staff_update_attendance.html', context)
@@ -162,7 +163,7 @@ def staff_apply_leave(request):
     context = {
         'form': form,
         'leave_history': LeaveReportStaff.objects.filter(staff=staff),
-        'page_title': 'Apply for Leave'
+        'page_title': 'Demander un Congé'
     }
     if request.method == 'POST':
         if form.is_valid():
@@ -171,12 +172,12 @@ def staff_apply_leave(request):
                 obj.staff = staff
                 obj.save()
                 messages.success(
-                    request, "Application for leave has been submitted for review")
+                    request, "Votre demande de congé a été soumise pour examen")
                 return redirect(reverse('staff_apply_leave'))
             except Exception:
-                messages.error(request, "Could not apply!")
+                messages.error(request, "Impossible de soumettre la demande!")
         else:
-            messages.error(request, "Form has errors!")
+            messages.error(request, "Le formulaire contient des erreurs!")
     return render(request, "staff_template/staff_apply_leave.html", context)
 
 
@@ -186,7 +187,7 @@ def staff_feedback(request):
     context = {
         'form': form,
         'feedbacks': FeedbackStaff.objects.filter(staff=staff),
-        'page_title': 'Add Feedback'
+        'page_title': 'Ajouter un Retour'
     }
     if request.method == 'POST':
         if form.is_valid():
@@ -194,19 +195,19 @@ def staff_feedback(request):
                 obj = form.save(commit=False)
                 obj.staff = staff
                 obj.save()
-                messages.success(request, "Feedback submitted for review")
+                messages.success(request, "Retour soumis pour examen")
                 return redirect(reverse('staff_feedback'))
             except Exception:
-                messages.error(request, "Could not Submit!")
+                messages.error(request, "Impossible de soumettre le retour!")
         else:
-            messages.error(request, "Form has errors!")
+            messages.error(request, "Le formulaire contient des erreurs!")
     return render(request, "staff_template/staff_feedback.html", context)
 
 
 def staff_view_profile(request):
     staff = get_object_or_404(Staff, admin=request.user)
     form = StaffEditForm(request.POST or None, request.FILES or None,instance=staff)
-    context = {'form': form, 'page_title': 'View/Update Profile'}
+    context = {'form': form, 'page_title': 'Voir/Modifier Profil'}
     if request.method == 'POST':
         try:
             if form.is_valid():
@@ -230,14 +231,14 @@ def staff_view_profile(request):
                 admin.gender = gender
                 admin.save()
                 staff.save()
-                messages.success(request, "Profile Updated!")
+                messages.success(request, "Profil mis à jour!")
                 return redirect(reverse('staff_view_profile'))
             else:
-                messages.error(request, "Invalid Data Provided")
+                messages.error(request, "Données invalides")
                 return render(request, "staff_template/staff_view_profile.html", context)
         except Exception as e:
             messages.error(
-                request, "Error Occured While Updating Profile " + str(e))
+                request, "Erreur lors de la mise à jour du profil " + str(e))
             return render(request, "staff_template/staff_view_profile.html", context)
 
     return render(request, "staff_template/staff_view_profile.html", context)
@@ -260,7 +261,7 @@ def staff_view_notification(request):
     notifications = NotificationStaff.objects.filter(staff=staff)
     context = {
         'notifications': notifications,
-        'page_title': "View Notifications"
+        'page_title': "Voir les Notifications"
     }
     return render(request, "staff_template/staff_view_notification.html", context)
 
@@ -270,7 +271,7 @@ def staff_add_result(request):
     subjects = Subject.objects.filter(staff=staff)
     sessions = Session.objects.all()
     context = {
-        'page_title': 'Result Upload',
+        'page_title': 'Ajouter un Résultat',
         'subjects': subjects,
         'sessions': sessions
     }
@@ -288,13 +289,13 @@ def staff_add_result(request):
                 data.exam = exam
                 data.test = test
                 data.save()
-                messages.success(request, "Scores Updated")
+                messages.success(request, "Notes mises à jour avec succès")
             except:
                 result = StudentResult(student=student, subject=subject, test=test, exam=exam)
                 result.save()
-                messages.success(request, "Scores Saved")
+                messages.success(request, "Notes enregistrées avec succès")
         except Exception as e:
-            messages.warning(request, "Error Occured While Processing Form")
+            messages.warning(request, "Erreur lors du traitement du formulaire")
     return render(request, "staff_template/staff_add_result.html", context)
 
 
@@ -325,6 +326,7 @@ def staff_course_materials(request):
     context = {
         'materials': materials,
         'subjects': subjects,
+        'page_title': 'Supports de Cours'
     }
     return render(request, 'staff_template/staff_course_materials.html', context)
 
@@ -591,3 +593,466 @@ def staff_dashboard(request):
         'page_title': 'Tableau de bord'
     }
     return render(request, 'staff_template/staff_dashboard.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_inbox(request):
+    staff = get_object_or_404(Staff, admin=request.user)
+    messages_received = Message.objects.filter(receiver=staff.admin)
+    
+    # Marquer comme lus les messages ouverts
+    if 'message_id' in request.GET:
+        message_id = request.GET.get('message_id')
+        message = get_object_or_404(Message, id=message_id, receiver=staff.admin)
+        message.is_read = True
+        message.save()
+    
+    context = {
+        'messages': messages_received,
+        'page_title': 'Messagerie - Boîte de réception'
+    }
+    return render(request, 'staff_template/staff_inbox.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_sent_messages(request):
+    staff = get_object_or_404(Staff, admin=request.user)
+    messages_sent = Message.objects.filter(sender=staff.admin)
+    
+    context = {
+        'messages': messages_sent,
+        'page_title': 'Messagerie - Messages envoyés'
+    }
+    return render(request, 'staff_template/staff_sent_messages.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_compose_message(request):
+    staff = get_object_or_404(Staff, admin=request.user)
+    course = staff.course
+    
+    # Récupérer les étudiants de la filière du professeur
+    students = Student.objects.filter(course=course)
+    
+    if request.method == 'POST':
+        receiver_id = request.POST.get('receiver')
+        subject = request.POST.get('subject')
+        content = request.POST.get('content')
+        attachment = request.FILES.get('attachment', None)
+        
+        if not receiver_id or not subject or not content:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            return redirect('staff_compose_message')
+        
+        try:
+            receiver = CustomUser.objects.get(id=receiver_id)
+            
+            # Créer le message
+            message = Message(
+                sender=staff.admin,
+                receiver=receiver,
+                subject=subject,
+                content=content,
+                attachment=attachment
+            )
+            message.save()
+            
+            messages.success(request, "Message envoyé avec succès.")
+            return redirect('staff_sent_messages')
+            
+        except Exception as e:
+            messages.error(request, f"Une erreur s'est produite : {str(e)}")
+    
+    context = {
+        'students': students,
+        'page_title': 'Composer un message'
+    }
+    return render(request, 'staff_template/staff_compose_message.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_view_message(request, message_id):
+    staff = get_object_or_404(Staff, admin=request.user)
+    
+    # Utiliser filter et get au lieu de get_object_or_404 avec Q
+    try:
+        message = Message.objects.filter(
+            id=message_id
+        ).filter(
+            Q(sender=staff.admin) | Q(receiver=staff.admin)
+        ).get()
+    except Message.DoesNotExist:
+        messages.error(request, "Message non trouvé.")
+        return redirect('staff_inbox')
+    
+    # Marquer comme lu si c'est un message reçu
+    if message.receiver == staff.admin and not message.is_read:
+        message.is_read = True
+        message.save()
+    
+    context = {
+        'message': message,
+        'page_title': f'Message - {message.subject}'
+    }
+    return render(request, 'staff_template/staff_view_message.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_forum_categories(request):
+    staff = get_object_or_404(Staff, admin=request.user)
+    
+    # Récupérer les catégories générales et celles de la filière du professeur
+    categories = ForumCategory.objects.filter(
+        Q(course__isnull=True) | Q(course=staff.course)
+    )
+    
+    context = {
+        'categories': categories,
+        'page_title': 'Forums de discussion'
+    }
+    return render(request, 'staff_template/staff_forum_categories.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_forum_topics(request, category_id):
+    staff = get_object_or_404(Staff, admin=request.user)
+    
+    # Utiliser filter et get au lieu de get_object_or_404 avec Q
+    try:
+        category = ForumCategory.objects.filter(
+            id=category_id
+        ).filter(
+            Q(course__isnull=True) | Q(course=staff.course)
+        ).get()
+    except ForumCategory.DoesNotExist:
+        messages.error(request, "Catégorie non trouvée ou vous n'avez pas accès à cette catégorie.")
+        return redirect('staff_forum_categories')
+    
+    topics = ForumTopic.objects.filter(category=category)
+    
+    context = {
+        'category': category,
+        'topics': topics,
+        'page_title': f'Forum - {category.name}'
+    }
+    return render(request, 'staff_template/staff_forum_topics.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_forum_topic_detail(request, topic_id):
+    staff = get_object_or_404(Staff, admin=request.user)
+    topic = get_object_or_404(ForumTopic, id=topic_id)
+    
+    # Vérifier que le professeur a accès à ce sujet
+    if not (topic.category.course is None or topic.category.course == staff.course):
+        messages.error(request, "Vous n'avez pas accès à ce sujet.")
+        return redirect('staff_forum_categories')
+    
+    # Incrémenter le compteur de vues
+    topic.views += 1
+    topic.save()
+    
+    replies = ForumReply.objects.filter(topic=topic)
+    
+    if request.method == 'POST' and not topic.is_closed:
+        content = request.POST.get('content')
+        mark_as_solution = request.POST.get('mark_solution', False)
+        
+        if content:
+            reply = ForumReply(
+                topic=topic,
+                content=content,
+                created_by=staff.admin,
+                is_solution=mark_as_solution
+            )
+            reply.save()
+            
+            if mark_as_solution:
+                # Optionnel: Fermer le sujet si une solution a été marquée
+                topic.is_closed = True
+                topic.save()
+                messages.success(request, "Votre réponse a été publiée comme solution. Le sujet est maintenant fermé.")
+            else:
+                messages.success(request, "Votre réponse a été publiée.")
+                
+            return redirect('staff_forum_topic_detail', topic_id=topic.id)
+        else:
+            messages.error(request, "Le contenu de la réponse ne peut pas être vide.")
+    
+    context = {
+        'topic': topic,
+        'replies': replies,
+        'page_title': topic.title,
+        'is_staff': True  # Pour indiquer que c'est un professeur qui voit la page
+    }
+    return render(request, 'staff_template/staff_forum_topic_detail.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_create_topic(request, category_id):
+    staff = get_object_or_404(Staff, admin=request.user)
+    
+    # Utiliser filter et get au lieu de get_object_or_404 avec Q
+    try:
+        category = ForumCategory.objects.filter(
+            id=category_id
+        ).filter(
+            Q(course__isnull=True) | Q(course=staff.course)
+        ).get()
+    except ForumCategory.DoesNotExist:
+        messages.error(request, "Catégorie non trouvée ou vous n'avez pas accès à cette catégorie.")
+        return redirect('staff_forum_categories')
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        is_pinned = request.POST.get('is_pinned', False)
+        
+        if title and content:
+            topic = ForumTopic(
+                title=title,
+                content=content,
+                category=category,
+                created_by=staff.admin,
+                is_pinned=is_pinned
+            )
+            topic.save()
+            
+            messages.success(request, "Votre sujet a été créé avec succès.")
+            return redirect('staff_forum_topic_detail', topic_id=topic.id)
+        else:
+            messages.error(request, "Veuillez remplir tous les champs.")
+    
+    context = {
+        'category': category,
+        'page_title': 'Créer un nouveau sujet',
+        'is_staff': True
+    }
+    return render(request, 'staff_template/staff_create_topic.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_manage_forum_category(request):
+    staff = get_object_or_404(Staff, admin=request.user)
+    
+    # Les professeurs peuvent créer des catégories pour leur cours
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        course_id = request.POST.get('course')
+        
+        if name and description:
+            if course_id:
+                course = get_object_or_404(Course, id=course_id)
+                # Vérifier que le professeur appartient à ce cours
+                if course != staff.course:
+                    messages.error(request, "Vous ne pouvez créer des catégories que pour votre filière.")
+                    return redirect('staff_manage_forum_category')
+            else:
+                course = None
+                
+            category = ForumCategory(
+                name=name,
+                description=description,
+                course=course
+            )
+            category.save()
+            
+            messages.success(request, "Catégorie créée avec succès.")
+            return redirect('staff_forum_categories')
+        else:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+    
+    # Récupérer les catégories existantes que le professeur peut gérer
+    categories = ForumCategory.objects.filter(course=staff.course)
+    
+    context = {
+        'categories': categories,
+        'course': staff.course,
+        'page_title': 'Gérer les catégories du forum'
+    }
+    return render(request, 'staff_template/staff_manage_forum_category.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_colab_notebooks(request):
+    """Vue pour afficher la liste des notebooks Google Colab créés par le professeur."""
+    staff = get_object_or_404(Staff, admin=request.user)
+    notebooks = GoogleColabNotebook.objects.filter(created_by=staff)
+    subjects = Subject.objects.filter(staff=staff)
+    
+    context = {
+        'notebooks': notebooks,
+        'subjects': subjects,
+        'page_title': 'Exercices Google Colab'
+    }
+    return render(request, 'staff_template/staff_colab_notebooks.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_add_colab_notebook(request):
+    """Vue pour ajouter un nouveau notebook Google Colab."""
+    staff = get_object_or_404(Staff, admin=request.user)
+    subjects = Subject.objects.filter(staff=staff)
+    
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        colab_url = request.POST.get('colab_url')
+        difficulty = request.POST.get('difficulty')
+        estimated_time = request.POST.get('estimated_time')
+        keywords = request.POST.get('keywords')
+        is_visible = True if request.POST.get('is_visible') == 'on' else False
+        
+        if not (subject_id and title and description and colab_url):
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            return redirect('staff_add_colab_notebook')
+        
+        try:
+            subject = get_object_or_404(Subject, id=subject_id)
+            
+            # Vérifier que le sujet appartient bien au professeur
+            if subject.staff != staff:
+                messages.error(request, "Vous n'êtes pas autorisé à ajouter des exercices pour ce module")
+                return redirect('staff_add_colab_notebook')
+            
+            # Créer le notebook
+            notebook = GoogleColabNotebook(
+                subject=subject,
+                title=title,
+                description=description,
+                colab_url=colab_url,
+                difficulty=difficulty,
+                created_by=staff,
+                is_visible=is_visible,
+                estimated_time=estimated_time or 60,
+                keywords=keywords
+            )
+            notebook.save()
+            
+            messages.success(request, "Exercice Google Colab ajouté avec succès")
+            return redirect('staff_colab_notebooks')
+            
+        except Exception as e:
+            messages.error(request, f"Erreur lors de l'ajout de l'exercice : {str(e)}")
+    
+    context = {
+        'subjects': subjects,
+        'page_title': 'Ajouter un Exercice Google Colab'
+    }
+    return render(request, 'staff_template/staff_add_colab_notebook.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_edit_colab_notebook(request, notebook_id):
+    """Vue pour modifier un notebook Google Colab existant."""
+    staff = get_object_or_404(Staff, admin=request.user)
+    notebook = get_object_or_404(GoogleColabNotebook, id=notebook_id, created_by=staff)
+    subjects = Subject.objects.filter(staff=staff)
+    
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        colab_url = request.POST.get('colab_url')
+        difficulty = request.POST.get('difficulty')
+        estimated_time = request.POST.get('estimated_time')
+        keywords = request.POST.get('keywords')
+        is_visible = True if request.POST.get('is_visible') == 'on' else False
+        
+        if not (subject_id and title and description and colab_url):
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            return redirect('staff_edit_colab_notebook', notebook_id=notebook.id)
+        
+        try:
+            subject = get_object_or_404(Subject, id=subject_id)
+            
+            # Vérifier que le sujet appartient bien au professeur
+            if subject.staff != staff:
+                messages.error(request, "Vous n'êtes pas autorisé à modifier cet exercice")
+                return redirect('staff_colab_notebooks')
+            
+            # Mettre à jour le notebook
+            notebook.subject = subject
+            notebook.title = title
+            notebook.description = description
+            notebook.colab_url = colab_url
+            notebook.difficulty = difficulty
+            notebook.is_visible = is_visible
+            notebook.estimated_time = estimated_time or 60
+            notebook.keywords = keywords
+            notebook.save()
+            
+            messages.success(request, "Exercice Google Colab modifié avec succès")
+            return redirect('staff_colab_notebooks')
+            
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la modification de l'exercice : {str(e)}")
+    
+    context = {
+        'notebook': notebook,
+        'subjects': subjects,
+        'page_title': 'Modifier un Exercice Google Colab'
+    }
+    return render(request, 'staff_template/staff_edit_colab_notebook.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_delete_colab_notebook(request, notebook_id):
+    """Vue pour supprimer un notebook Google Colab."""
+    staff = get_object_or_404(Staff, admin=request.user)
+    notebook = get_object_or_404(GoogleColabNotebook, id=notebook_id, created_by=staff)
+    
+    try:
+        notebook.delete()
+        messages.success(request, "Exercice Google Colab supprimé avec succès")
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la suppression : {str(e)}")
+    
+    return redirect('staff_colab_notebooks')
+
+@login_required(login_url='login')
+@user_passes_test(is_staff)
+def staff_view_student_progress(request, notebook_id):
+    """Vue pour voir la progression des étudiants sur un notebook spécifique."""
+    staff = get_object_or_404(Staff, admin=request.user)
+    notebook = get_object_or_404(GoogleColabNotebook, id=notebook_id, created_by=staff)
+    
+    # Récupérer les étudiants de la filière correspondant au module
+    students = Student.objects.filter(course=staff.course)
+    
+    # Récupérer les progressions pour ce notebook
+    progresses = ColabNotebookProgress.objects.filter(
+        notebook=notebook,
+        student__in=students
+    )
+    
+    # Créer un dictionnaire pour associer chaque étudiant à sa progression
+    student_progresses = {}
+    for student in students:
+        progress = progresses.filter(student=student).first()
+        if not progress:
+            # Si pas de progression enregistrée, créer un objet vide
+            student_progresses[student] = {
+                'progress_percent': 0,
+                'is_completed': False,
+                'last_accessed': None,
+                'completed_date': None,
+                'notes': ''
+            }
+        else:
+            student_progresses[student] = {
+                'progress_percent': progress.progress_percent,
+                'is_completed': progress.is_completed,
+                'last_accessed': progress.last_accessed,
+                'completed_date': progress.completed_date,
+                'notes': progress.notes
+            }
+    
+    context = {
+        'notebook': notebook,
+        'student_progresses': student_progresses,
+        'page_title': f'Progression des étudiants - {notebook.title}'
+    }
+    return render(request, 'staff_template/staff_view_student_progress.html', context)
