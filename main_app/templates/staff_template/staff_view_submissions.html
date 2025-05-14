@@ -1,0 +1,157 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block page_title %}Soumissions - {{ assignment.title }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Soumissions - {{ assignment.title }}</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Étudiant</th>
+                                        <th>Date de soumission</th>
+                                        <th>Statut</th>
+                                        <th>Soumission</th>
+                                        <th>Note</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for submission in submissions %}
+                                    <tr>
+                                        <td>{{ submission.student.admin.get_full_name }}</td>
+                                        <td>{{ submission.submitted_at|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge {% if submission.is_late %}badge-danger{% else %}badge-success{% endif %}">
+                                                {% if submission.is_late %}En retard{% else %}À l'heure{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if assignment.assignment_type == 'quiz' %}
+                                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#quizModal{{ submission.id }}">
+                                                    <i class="fas fa-eye"></i> Voir les réponses
+                                                </button>
+                                            {% else %}
+                                                {% if submission.submission_file %}
+                                                    <a href="{{ submission.submission_file.url }}" class="btn btn-info btn-sm" target="_blank">
+                                                        <i class="fas fa-file-download"></i> Télécharger
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">Aucun fichier</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if submission.score is not None %}
+                                            {{ submission.score }}/20
+                                            {% else %}
+                                            Non noté
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if assignment.assignment_type == 'quiz' %}
+                                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#quizModal{{ submission.id }}">
+                                                    <i class="fas fa-eye"></i> Voir le détail
+                                                </button>
+                                            {% else %}
+                                                <a href="{% url 'staff_grade_submission' submission.id %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-edit"></i> Noter
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    {% if assignment.assignment_type == 'quiz' %}
+                                    <!-- Modal pour afficher les réponses du quiz -->
+                                    <div class="modal fade" id="quizModal{{ submission.id }}" tabindex="-1" role="dialog" aria-labelledby="quizModalLabel{{ submission.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="quizModalLabel{{ submission.id }}">Réponses de {{ submission.student.admin.get_full_name }}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    {% for answer in submission.answers.all %}
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+                                                            <h6>Question {{ forloop.counter }}</h6>
+                                                            <p>{{ answer.question.text }}</p>
+                                                            
+                                                            {% if assignment.quiz_type == 'qcm' %}
+                                                                {% for choice in answer.question.choices.all %}
+                                                                <div class="custom-control custom-radio">
+                                                                    <input type="radio" class="custom-control-input" disabled
+                                                                           {% if answer.selected_choice == choice %}checked{% endif %}>
+                                                                    <label class="custom-control-label {% if choice.is_correct %}text-success{% endif %}">
+                                                                        {{ choice.text }}
+                                                                        {% if choice.is_correct %}
+                                                                        <i class="fas fa-check text-success"></i>
+                                                                        {% endif %}
+                                                                    </label>
+                                                                </div>
+                                                                {% endfor %}
+                                                                <div class="mt-2">
+                                                                    <span class="badge {% if answer.is_correct %}badge-success{% else %}badge-danger{% endif %}">
+                                                                        {% if answer.is_correct %}
+                                                                            Correct (+{{ submission.assignment.total_points|divisibleby:submission.answers.count }} points)
+                                                                        {% else %}
+                                                                            Incorrect (0 points)
+                                                                        {% endif %}
+                                                                    </span>
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="form-group">
+                                                                    <label>Réponse de l'étudiant:</label>
+                                                                    <p class="form-control-static">{{ answer.text_answer }}</p>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                    <div class="alert alert-info">
+                                                        <strong>Score total : {{ submission.score }}/20</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">Aucune soumission disponible</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

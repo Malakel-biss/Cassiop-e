@@ -1,0 +1,106 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Voir les Présences{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Historique des Présences</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Matière</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in attendance_reports %}
+                                    <tr>
+                                        <td>{{ report.attendance.subject.name }}</td>
+                                        <td>{{ report.attendance.date }}</td>
+                                        <td>
+                                            <span class="badge {% if report.status %}badge-success{% else %}badge-danger{% endif %}">
+                                                {% if report.status %}Présent{% else %}Absent{% endif %}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">Aucune donnée de présence disponible</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('attendanceForm');
+    const attendanceData = document.getElementById('attendanceData');
+    const tableBody = document.getElementById('attendanceTableBody');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const subject = document.getElementById('subject').value;
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+
+        if (!subject || !startDate || !endDate) {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
+
+        fetch('', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                tableBody.innerHTML = '';
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.date}</td>
+                        <td>
+                            <span class="badge ${item.status ? 'badge-success' : 'badge-danger'}">
+                                ${item.status ? 'Présent' : 'Absent'}
+                            </span>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                attendanceData.style.display = 'block';
+            } else {
+                alert('Aucune donnée de présence trouvée pour cette période');
+                attendanceData.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la récupération des données');
+        });
+    });
+});
+</script>
+{% endblock %}

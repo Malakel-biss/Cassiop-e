@@ -1,0 +1,75 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block title %}Retour d'Expérience{% endblock title %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Retour d'Expérience</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'student_home' %}">Tableau de bord</a></li>
+        <li class="breadcrumb-item active">Retour d'Expérience</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-comment-alt me-1"></i>
+                    Envoyer un Retour
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="feedback" class="form-label">Votre message</label>
+                            <textarea class="form-control" id="feedback" name="feedback" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Envoyer
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-history me-1"></i>
+                    Historique des Retours
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Message</th>
+                                    <th>Réponse</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feedback in feedbacks %}
+                                <tr>
+                                    <td>{{ feedback.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ feedback.feedback }}</td>
+                                    <td>
+                                        {% if feedback.reply %}
+                                            {{ feedback.reply }}
+                                        {% else %}
+                                            <span class="text-muted">En attente de réponse</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">Aucun retour envoyé.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

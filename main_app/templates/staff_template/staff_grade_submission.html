@@ -1,0 +1,86 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Noter - {{ submission.student.admin.get_full_name }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Noter la soumission de {{ submission.student.admin.get_full_name }}</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <form method="POST">
+                            {% csrf_token %}
+                            
+                            {% if submission.assignment.assignment_type == 'quiz' %}
+                            <div class="questions-section">
+                                {% for answer in submission.answers.all %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5>Question {{ forloop.counter }}</h5>
+                                        <p>{{ answer.question.question_text }}</p>
+                                        <div class="form-group">
+                                            <label>Réponse de l'étudiant:</label>
+                                            <p class="form-control-static">{{ answer.answer_text }}</p>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Est-ce correct?</label>
+                                            <select name="answers[]" class="form-control" required>
+                                                <option value="true" {% if answer.is_correct %}selected{% endif %}>Oui</option>
+                                                <option value="false" {% if not answer.is_correct %}selected{% endif %}>Non</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="form-group">
+                                <label>Fichier soumis:</label>
+                                {% if submission.file %}
+                                <p>
+                                    <a href="{{ submission.file.url }}" target="_blank" class="btn btn-info">
+                                        <i class="fas fa-download"></i> Télécharger le fichier
+                                    </a>
+                                </p>
+                                {% else %}
+                                <p class="text-muted">Aucun fichier soumis</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="form-group">
+                                <label>Note (sur 20)</label>
+                                <input type="number" name="score" class="form-control" min="0" max="20" step="0.5" value="{{ submission.score|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Feedback</label>
+                                <textarea name="feedback" class="form-control" rows="3">{{ submission.feedback|default:'' }}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">Enregistrer la note</button>
+                                <a href="{% url 'staff_view_submissions' submission.assignment.id %}" class="btn btn-default">Retour</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

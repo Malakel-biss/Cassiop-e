@@ -1,0 +1,19 @@
+{% extends 'main_app/base.html' %}
+{% block title %}Tableau de bord Professeur{% endblock title %}
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Tableau de bord Professeur</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'staff_home' %}">Tableau de bord</a></li>
+        <li class="breadcrumb-item active">Professeur</li>
+    </ol>
+    {% block staff_content %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'staff_course_materials' %}">
+            <i class="fas fa-book"></i>
+            <span>Supports de Cours</span>
+        </a>
+    </li>
+    {% endblock %}
+</div>
+{% endblock %} 

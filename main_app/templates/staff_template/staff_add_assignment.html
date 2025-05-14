@@ -1,0 +1,209 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Ajouter un Quiz/Devoir{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ajouter un Quiz/Devoir</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label>Titre</label>
+                                <input type="text" name="title" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea name="description" class="form-control" rows="3" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Module</label>
+                                <select name="subject" class="form-control" required>
+                                    <option value="">Sélectionner un module</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select name="assignment_type" class="form-control" id="assignment_type" required>
+                                    <option value="">Sélectionner un type</option>
+                                    <option value="quiz">Quiz</option>
+                                    <option value="homework">Devoir</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="quiz_type_group" style="display: none;">
+                                <label>Type de Quiz</label>
+                                <select name="quiz_type" class="form-control" id="quiz_type">
+                                    <option value="qcm">QCM</option>
+                                    <option value="text">Questions ouvertes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Date limite</label>
+                                <input type="datetime-local" name="due_date" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Points totaux</label>
+                                <input type="number" name="total_points" class="form-control" value="20" min="1" required>
+                            </div>
+
+                            <div class="form-group" id="support_file_group">
+                                <label>Support (PDF, DOC, DOCX, ZIP, RAR)</label>
+                                <input type="file" name="support_file" class="form-control" accept=".pdf,.doc,.docx,.zip,.rar">
+                            </div>
+
+                            <div id="questions_container" style="display: none;">
+                                <h4>Questions</h4>
+                                <div id="questions_list"></div>
+                                <button type="button" class="btn btn-info" id="add_question">Ajouter une question</button>
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                <a href="{% url 'staff_assignments' %}" class="btn btn-secondary">Annuler</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+$(document).ready(function() {
+    // Fonction pour mettre à jour les numéros des questions
+    function updateQuestionNumbers() {
+        $('.question-item').each(function(index) {
+            $(this).find('label:first').text('Question ' + (index + 1));
+            var questionIndex = index;
+            $(this).find('input[name^="choices_"]').attr('name', `choices_${questionIndex}[]`);
+            $(this).find('select[name^="correct_choice_"]').attr('name', `correct_choice_${questionIndex}`);
+        });
+    }
+
+    // Fonction pour mettre à jour les options de réponse correcte
+    function updateCorrectChoiceOptions(questionIndex) {
+        var numChoices = $(`[name^="choices_${questionIndex}[]"]`).length;
+        var select = $(`[name="correct_choice_${questionIndex}"]`);
+        select.empty();
+        for (var i = 0; i < numChoices; i++) {
+            select.append(`<option value="${i}">Choix ${i + 1}</option>`);
+        }
+    }
+
+    // Gestion du changement de type d'assignement
+    $('#assignment_type').change(function() {
+        var type = $(this).val();
+        if (type === 'quiz') {
+            $('#quiz_type_group').show();
+            $('#questions_container').show();
+            $('#support_file_group').hide();
+        } else if (type === 'homework') {
+            $('#quiz_type_group').hide();
+            $('#questions_container').hide();
+            $('#support_file_group').show();
+        }
+    });
+
+    // Gestion du changement de type de quiz
+    $('#quiz_type').change(function() {
+        var type = $(this).val();
+        if (type === 'qcm') {
+            $('.question-choices').show();
+        } else {
+            $('.question-choices').hide();
+        }
+    });
+
+    // Ajout d'une nouvelle question
+    $('#add_question').click(function() {
+        var questionIndex = $('.question-item').length;
+        var questionHtml = `
+            <div class="question-item card mt-3">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Question ${questionIndex + 1}</label>
+                        <input type="text" name="questions[]" class="form-control" required>
+                    </div>
+                    <div class="question-choices" style="display: none;">
+                        <div class="choices-list">
+                            <div class="form-group">
+                                <label>Choix 1</label>
+                                <input type="text" name="choices_${questionIndex}[]" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Choix 2</label>
+                                <input type="text" name="choices_${questionIndex}[]" class="form-control" required>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-info add-choice" data-question="${questionIndex}">Ajouter un choix</button>
+                        <div class="form-group mt-2">
+                            <label>Réponse correcte</label>
+                            <select name="correct_choice_${questionIndex}" class="form-control" required>
+                                <option value="0">Choix 1</option>
+                                <option value="1">Choix 2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger remove-question">Supprimer</button>
+                </div>
+            </div>
+        `;
+        $('#questions_list').append(questionHtml);
+        
+        // Afficher les choix si le type de quiz est QCM
+        if ($('#quiz_type').val() === 'qcm') {
+            $('.question-choices').show();
+        }
+    });
+
+    // Suppression d'une question
+    $(document).on('click', '.remove-question', function() {
+        $(this).closest('.question-item').remove();
+        updateQuestionNumbers();
+    });
+
+    // Ajout d'un nouveau choix
+    $(document).on('click', '.add-choice', function() {
+        var questionIndex = $(this).data('question');
+        var choiceIndex = $(this).closest('.question-item').find('.choices-list .form-group').length;
+        var choiceHtml = `
+            <div class="form-group">
+                <label>Choix ${choiceIndex + 1}</label>
+                <input type="text" name="choices_${questionIndex}[]" class="form-control" required>
+            </div>
+        `;
+        $(this).closest('.question-item').find('.choices-list').append(choiceHtml);
+        updateCorrectChoiceOptions(questionIndex);
+    });
+});
+</script>
+{% endblock custom_js %} 

@@ -1,0 +1,295 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block page_title %}{{ assignment.title }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ assignment.title }}</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="assignment-details mb-4">
+                            <h4>Description</h4>
+                            <p>{{ assignment.description }}</p>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <p><strong>Matière:</strong> {{ assignment.subject.name }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p><strong>Type:</strong> 
+                                        {% if assignment.assignment_type == 'quiz' %}
+                                            Quiz {% if assignment.quiz_type == 'qcm' %}(QCM){% else %}(Questions ouvertes){% endif %}
+                                        {% else %}
+                                            Devoir
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p><strong>Date limite:</strong> {{ assignment.due_date|date:"d/m/Y H:i" }}</p>
+                                </div>
+                            </div>
+
+                            {% if assignment.support_file %}
+                            <div class="mt-3">
+                                <h5>Fichier support</h5>
+                                <a href="{{ assignment.support_file.url }}" class="btn btn-info" target="_blank">
+                                    <i class="fas fa-file-download"></i> Télécharger le fichier
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if now > assignment.due_date %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> La date limite est dépassée. Vous ne pouvez plus soumettre ou modifier votre travail.
+                            </div>
+                        {% endif %}
+
+                        {% if submission %}
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle"></i> Votre soumission</h5>
+                                <p>Date de soumission: {{ submission.submitted_at|date:"d/m/Y H:i" }}</p>
+                                
+                                {% if assignment.assignment_type == 'quiz' %}
+                                    {% if submission.answers.exists %}
+                                        <button type="button" class="btn btn-info mt-2" data-toggle="modal" data-target="#quizDetailsModal">
+                                            <i class="fas fa-eye"></i> Voir les détails des réponses
+                                        </button>
+
+                                        <!-- Modal pour les détails des réponses -->
+                                        <div class="modal fade" id="quizDetailsModal" tabindex="-1" role="dialog" aria-labelledby="quizDetailsModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="quizDetailsModalLabel">Détails de vos réponses</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        {% for answer in submission.answers.all %}
+                                                        <div class="card mb-3">
+                                                            <div class="card-body">
+                                                                <h6>Question {{ forloop.counter }}</h6>
+                                                                <p>{{ answer.question.text }}</p>
+                                                                
+                                                                {% if assignment.quiz_type == 'qcm' %}
+                                                                    <div class="choices-list">
+                                                                        {% for choice in answer.question.choices.all %}
+                                                                        <div class="choice-item {% if choice.is_correct %}correct-choice{% endif %} {% if answer.selected_choice == choice %}selected-choice{% endif %}">
+                                                                            <div class="custom-control custom-radio">
+                                                                                <input type="radio" class="custom-control-input" disabled
+                                                                                       {% if answer.selected_choice == choice %}checked{% endif %}>
+                                                                                <label class="custom-control-label">
+                                                                                    {{ choice.text }}
+                                                                                    {% if choice.is_correct %}
+                                                                                    <i class="fas fa-check text-success"></i>
+                                                                                    {% endif %}
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <span class="badge {% if answer.is_correct %}badge-success{% else %}badge-danger{% endif %}">
+                                                                            {% if answer.is_correct %}
+                                                                                Correct (+{{ submission.assignment.total_points|divisibleby:submission.answers.count }} points)
+                                                                            {% else %}
+                                                                                Incorrect (0 points)
+                                                                            {% endif %}
+                                                                        </span>
+                                                                    </div>
+                                                                {% else %}
+                                                                    <div class="form-group">
+                                                                        <label>Votre réponse:</label>
+                                                                        <p class="form-control-static">{{ answer.text_answer }}</p>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        {% endfor %}
+                                                        <div class="alert alert-info">
+                                                            <strong>Score total : {{ submission.score }}/20</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    {% if submission.submission_file %}
+                                        <div class="submission-details">
+                                            <h6>Fichier soumis:</h6>
+                                            <div class="d-flex align-items-center">
+                                                <a href="{{ submission.submission_file.url }}" class="btn btn-info" target="_blank">
+                                                    <i class="fas fa-file-download"></i> Télécharger
+                                                </a>
+                                                <span class="ml-3">
+                                                    <i class="fas fa-file-alt"></i> {{ submission.submission_file.name }}
+                                                </span>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock"></i> Soumis le {{ submission.submitted_at|date:"d/m/Y H:i" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle"></i> Aucun fichier soumis
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if submission.score is not None %}
+                                    <div class="mt-3">
+                                        <h6>Note:</h6>
+                                        <p class="score-display">{{ submission.score }}/20</p>
+                                    </div>
+                                {% endif %}
+
+                                {% if submission.feedback %}
+                                    <div class="mt-3">
+                                        <h6>Feedback:</h6>
+                                        <p class="feedback-text">{{ submission.feedback }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {% if now <= assignment.due_date %}
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                {% if assignment.assignment_type == 'quiz' %}
+                                    <div class="quiz-questions">
+                                        {% for question in assignment.questions.all %}
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Question {{ forloop.counter }}</h5>
+                                                <p class="card-text">{{ question.text }}</p>
+                                                
+                                                {% if assignment.quiz_type == 'qcm' %}
+                                                    {% for choice in question.choices.all %}
+                                                    <div class="custom-control custom-radio">
+                                                        <input type="radio" class="custom-control-input" 
+                                                               id="choice{{ choice.id }}" 
+                                                               name="question_{{ question.id }}" 
+                                                               value="{{ choice.id }}"
+                                                               {% if submission %}
+                                                                   {% for answer in submission.answers.all %}
+                                                                       {% if answer.question == question and answer.selected_choice == choice %}
+                                                                           checked
+                                                                       {% endif %}
+                                                                   {% endfor %}
+                                                               {% endif %}>
+                                                        <label class="custom-control-label" for="choice{{ choice.id }}">
+                                                            {{ choice.text }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <div class="form-group">
+                                                        <textarea class="form-control" 
+                                                                  name="question_{{ question.id }}" 
+                                                                  rows="3"
+                                                                  {% if submission %}
+                                                                      {% for answer in submission.answers.all %}
+                                                                          {% if answer.question == question %}
+                                                                              >{{ answer.text_answer }}</textarea>
+                                                                          {% endif %}
+                                                                      {% endfor %}
+                                                                  {% else %}
+                                                                      ></textarea>
+                                                                  {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="form-group">
+                                        <label for="file">Soumission de fichier</label>
+                                        <input type="file" class="form-control-file" id="file" name="file" {% if not submission %}required{% endif %}>
+                                        <small class="form-text text-muted">
+                                            Formats acceptés: PDF, DOC, DOCX, ZIP, RAR. Taille maximale: 10MB
+                                        </small>
+                                    </div>
+                                {% endif %}
+
+                                <button type="submit" class="btn btn-primary">
+                                    {% if submission %}
+                                        <i class="fas fa-save"></i> Modifier la soumission
+                                    {% else %}
+                                        <i class="fas fa-upload"></i> Soumettre
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.choices-list {
+    margin: 10px 0;
+}
+.choice-item {
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+.correct-choice {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+.selected-choice {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+.selected-choice.correct-choice {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+.submission-details {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+.score-display {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #28a745;
+}
+.feedback-text {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid #17a2b8;
+}
+</style>
+{% endblock content %} 
