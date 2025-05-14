@@ -5,69 +5,315 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>AdminLTE 3 | Log in</title>
+    <title>Plateforme d'apprentissage | Connexion</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
     <!-- Ionicons -->
-    <link rel="stylesheet" href="{% static 'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- icheck bootstrap -->
     <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <style>
+        body {
+            background: url('{% static "dist/img/imtbs.png" %}') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Superposition de fumée noire */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+        
+        .login-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-box {
+            width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            animation: zoomIn 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), float 6s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .login-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #1a73e8, #34a853, #fbbc05, #ea4335);
+            animation: shimmer 3s infinite linear;
+            background-size: 400% 100%;
+        }
+        
+        .login-logo {
+            padding: 25px 20px 15px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .login-logo img {
+            height: 80px;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+        
+        .login-logo a {
+            color: #1a73e8 !important;
+            font-weight: bold;
+            font-size: 28px;
+            display: block;
+            letter-spacing: 1px;
+            text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+            animation: slideDown 1s ease;
+        }
+        
+        .login-card-body {
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .login-box-msg {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+            animation: fadeIn 1s ease 0.5s both;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+            animation: fadeIn 1s ease 0.7s both;
+        }
+        
+        .form-control {
+            height: 50px;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-control:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .input-group-text {
+            border-radius: 10px;
+            background-color: rgba(248, 249, 250, 0.8);
+            border: 2px solid #e0e0e0;
+            min-width: 50px;
+            justify-content: center;
+        }
+        
+        .input-group:hover .input-group-text {
+            background-color: #f0f4ff;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8 !important;
+            border-color: #1a73e8 !important;
+            height: 50px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease 0.9s both;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.4);
+            background-color: #0d62d2 !important;
+        }
+        
+        .btn-primary:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .alert-danger {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: shake 0.5s ease-in-out;
+            background-color: rgba(220, 53, 69, 0.95);
+            border: none;
+            color: white;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        @keyframes zoomIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            10%, 30%, 50%, 70%, 90% {transform: translateX(-7px);}
+            20%, 40%, 60%, 80% {transform: translateX(7px);}
+        }
+    </style>
 </head>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <a href="../../index2.html"><b>Admin</b>LTE</a>
-        </div>
-        <!-- /.login-logo -->
-        <div class="card">
-            <div class="card-body login-card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
-                {% if messages %}
-                <div class="col-12">
-                    {% for message in messages %}
-                    {% if message.tags == 'error' %}
-                    <div class="alert alert-danger text-center ">
-                        {{message }}
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="{% static 'dist/img/logo.png' %}" alt="Logo" />
+                <a href="#"><b>Plateforme</b> d'apprentissage</a>
+            </div>
+            <!-- /.login-logo -->
+            <div class="card shadow-none">
+                <div class="card-body login-card-body">
+                    <p class="login-box-msg">Connectez-vous pour accéder à votre espace</p>
+                    {% if messages %}
+                    <div class="col-12">
+                        {% for message in messages %}
+                        {% if message.tags == 'error' %}
+                        <div class="alert alert-danger">
+                            {{message }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                     {% endif %}
-                    {% endfor %}
+                    <form action="doLogin/" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input required type="email" name='email' class="form-control" placeholder="Email">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-envelope"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <input required type="password" name='password' class="form-control" placeholder="Mot de passe">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-lock"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                {% endif %}
-                <form action="doLogin/" method="post">
-                    {% csrf_token %}
-                    <div class="input-group mb-3">
-                        <input required type="email" name='email' class="form-control" placeholder="Email">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input required type="password" name='password' class="form-control" placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-                        </div>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
-    <!-- /.login-box -->
 
     <!-- jQuery -->
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>

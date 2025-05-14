@@ -1,0 +1,92 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <a href="{% url 'staff_compose_message' %}" class="btn btn-primary btn-block mb-3">
+                    <i class="fas fa-edit"></i> Nouveau message
+                </a>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Dossiers</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item">
+                                <a href="{% url 'staff_inbox' %}" class="nav-link">
+                                    <i class="fas fa-inbox"></i> Boîte de réception
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'staff_sent_messages' %}" class="nav-link">
+                                    <i class="fas fa-envelope"></i> Messages envoyés
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ message.subject }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="message-header">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <strong>De:</strong> {{ message.sender.first_name }} {{ message.sender.last_name }} &lt;{{ message.sender.email }}&gt;<br>
+                                    <strong>À:</strong> {{ message.receiver.first_name }} {{ message.receiver.last_name }} &lt;{{ message.receiver.email }}&gt;<br>
+                                    <strong>Date:</strong> {{ message.created_at|date:"d/m/Y H:i" }}
+                                </div>
+                                <div>
+                                    {% if message.sender != request.user %}
+                                    <a href="{% url 'staff_compose_message' %}?reply_to={{ message.id }}" class="btn btn-primary">
+                                        <i class="fas fa-reply"></i> Répondre
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="message-content mb-4">
+                            {{ message.content|linebreaks }}
+                        </div>
+                        
+                        {% if message.attachment %}
+                        <div class="message-attachment mt-3">
+                            <div class="attachment">
+                                <h5>Pièce jointe:</h5>
+                                <div class="attachment-preview">
+                                    <a href="{{ message.attachment.url }}" class="btn btn-default">
+                                        <i class="fas fa-paperclip"></i> {{ message.attachment.name|cut:"message_attachments/" }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="message-actions mt-4">
+                            {% if request.user == message.receiver %}
+                            <a href="{% url 'staff_inbox' %}" class="btn btn-default">
+                                <i class="fas fa-arrow-left"></i> Retour à la boîte de réception
+                            </a>
+                            {% else %}
+                            <a href="{% url 'staff_sent_messages' %}" class="btn btn-default">
+                                <i class="fas fa-arrow-left"></i> Retour aux messages envoyés
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

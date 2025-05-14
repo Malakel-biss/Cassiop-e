@@ -25,7 +25,7 @@ def login_page(request):
 
 def doLogin(request, **kwargs):
     if request.method != 'POST':
-        return HttpResponse("<h4>Denied</h4>")
+        return HttpResponse("<h4>Accès refusé</h4>")
     else:
         #Authenticate
         user = EmailBackend.authenticate(request, username=request.POST.get('email'), password=request.POST.get('password'))
@@ -38,7 +38,7 @@ def doLogin(request, **kwargs):
             else:
                 return redirect(reverse("student_home"))
         else:
-            messages.error(request, "Invalid details")
+            messages.error(request, "Identifiants invalides")
             return redirect("/")
 
 

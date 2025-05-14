@@ -28,7 +28,7 @@
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
 
-                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Add Student"%}
+                    {% include "main_app/form_template.html" with messages=messages  form=form button_text="Ajouter Étudiant"%}
                 </div>
                 <!-- /.card -->
 
@@ -55,15 +55,15 @@
             }).done(function(response){
                 if (response == "True"){
                     $(".email_error").remove()
-                    $("<span class='invalid email_error'>Email Address Already Exist</span>").insertAfter("#id_email");
+                    $("<span class='invalid email_error'>Cette adresse email existe déjà</span>").insertAfter("#id_email");
                 }
                 else{
                     $(".email_error").remove()
 
-                    $("<span class='valid email_error'>Email Address Available</span>").insertAfter("#id_email");
+                    $("<span class='valid email_error'>Adresse email disponible</span>").insertAfter("#id_email");
                 }
             }).fail(function(response){
-                $("<span class='alert alert-warning'>Server Could Not Process This</span>").insertAfter("#id_email");
+                $("<span class='alert alert-warning'>Le serveur n'a pas pu traiter cette demande</span>").insertAfter("#id_email");
             })
         }
         })

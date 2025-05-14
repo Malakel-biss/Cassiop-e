@@ -13,16 +13,16 @@ class FormSettings(forms.ModelForm):
 
 
 class CustomUserForm(FormSettings):
-    email = forms.EmailField(required=True)
-    gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
-    address = forms.CharField(widget=forms.Textarea)
-    password = forms.CharField(widget=forms.PasswordInput)
+    email = forms.EmailField(required=True, label="Email")
+    gender = forms.ChoiceField(choices=[('M', 'Masculin'), ('F', 'Féminin')], label="Genre")
+    first_name = forms.CharField(required=True, label="Prénom")
+    last_name = forms.CharField(required=True, label="Nom")
+    address = forms.CharField(widget=forms.Textarea, label="Adresse")
+    password = forms.CharField(widget=forms.PasswordInput, label="Mot de passe")
     widget = {
         'password': forms.PasswordInput(),
     }
-    profile_pic = forms.ImageField()
+    profile_pic = forms.ImageField(label="Photo de profil")
 
     def __init__(self, *args, **kwargs):
         super(CustomUserForm, self).__init__(*args, **kwargs)
@@ -33,20 +33,20 @@ class CustomUserForm(FormSettings):
             for field in CustomUserForm.Meta.fields:
                 self.fields[field].initial = instance.get(field)
             if self.instance.pk is not None:
-                self.fields['password'].widget.attrs['placeholder'] = "Fill this only if you wish to update password"
+                self.fields['password'].widget.attrs['placeholder'] = "Remplissez uniquement si vous souhaitez modifier le mot de passe"
 
     def clean_email(self, *args, **kwargs):
         formEmail = self.cleaned_data['email'].lower()
         if self.instance.pk is None:  # Insert
             if CustomUser.objects.filter(email=formEmail).exists():
                 raise forms.ValidationError(
-                    "The given email is already registered")
+                    "Cette adresse email est déjà enregistrée")
         else:  # Update
             dbEmail = self.Meta.model.objects.get(
                 id=self.instance.pk).admin.email.lower()
             if dbEmail != formEmail:  # There has been changes
                 if CustomUser.objects.filter(email=formEmail).exists():
-                    raise forms.ValidationError("The given email is already registered")
+                    raise forms.ValidationError("Cette adresse email est déjà enregistrée")
 
         return formEmail
 
@@ -91,6 +91,9 @@ class CourseForm(FormSettings):
     class Meta:
         fields = ['name']
         model = Course
+        labels = {
+            'name': 'Nom de la filière'
+        }
 
 
 class SubjectForm(FormSettings):
@@ -101,6 +104,11 @@ class SubjectForm(FormSettings):
     class Meta:
         model = Subject
         fields = ['name', 'staff', 'course']
+        labels = {
+            'name': 'Nom du module',
+            'staff': 'Professeur',
+            'course': 'Filière'
+        }
 
 
 class SessionForm(FormSettings):
@@ -113,6 +121,10 @@ class SessionForm(FormSettings):
         widgets = {
             'start_year': DateInput(attrs={'type': 'date'}),
             'end_year': DateInput(attrs={'type': 'date'}),
+        }
+        labels = {
+            'start_year': 'Année de début',
+            'end_year': 'Année de fin'
         }
 
 
@@ -185,7 +197,7 @@ class StaffEditForm(CustomUserForm):
 class EditResultForm(FormSettings):
     session_list = Session.objects.all()
     session_year = forms.ModelChoiceField(
-        label="Session Year", queryset=session_list, required=True)
+        label="Année de session", queryset=session_list, required=True)
 
     def __init__(self, *args, **kwargs):
         super(EditResultForm, self).__init__(*args, **kwargs)

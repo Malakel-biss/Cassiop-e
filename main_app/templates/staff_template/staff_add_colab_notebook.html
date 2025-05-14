@@ -1,0 +1,124 @@
+{% extends 'staff_template/staff_base.html' %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Ajouter un exercice Google Colab</h3>
+                <div class="float-right">
+                    <a href="{% url 'staff_colab_notebooks' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-info">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <form method="post" action="{% url 'staff_add_colab_notebook' %}">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="subject">Module <span class="text-danger">*</span></label>
+                                <select class="form-control" name="subject" id="subject" required>
+                                    <option value="">Sélectionnez un module</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.course.name }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="title">Titre <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="title" id="title" placeholder="Titre de l'exercice" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description">Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" name="description" id="description" rows="4" placeholder="Description détaillée de l'exercice" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="colab_url">URL Google Colab <span class="text-danger">*</span></label>
+                                <input type="url" class="form-control" name="colab_url" id="colab_url" placeholder="https://colab.research.google.com/drive/..." required>
+                                <small class="form-text text-muted">Copiez l'URL de partage de votre notebook Google Colab (assurez-vous qu'il est accessible en lecture pour tous).</small>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="difficulty">Niveau de difficulté</label>
+                                    <select class="form-control" name="difficulty" id="difficulty">
+                                        <option value="beginner">Débutant</option>
+                                        <option value="intermediate">Intermédiaire</option>
+                                        <option value="advanced">Avancé</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group col-md-4">
+                                    <label for="estimated_time">Temps estimé (minutes)</label>
+                                    <input type="number" class="form-control" name="estimated_time" id="estimated_time" min="5" value="60">
+                                </div>
+                                
+                                <div class="form-group col-md-4 d-flex align-items-end">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="is_visible" name="is_visible" checked>
+                                        <label class="custom-control-label" for="is_visible">Visible pour les étudiants</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="keywords">Mots-clés</label>
+                                <input type="text" class="form-control" name="keywords" id="keywords" placeholder="pandas, machine learning, régression, ...">
+                                <small class="form-text text-muted">Séparez les mots-clés par des virgules.</small>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-lightbulb"></i> Conseils pour un bon exercice</h5>
+                                <ul>
+                                    <li>Assurez-vous que le notebook est bien structuré avec des instructions claires</li>
+                                    <li>Incluez des objectifs d'apprentissage au début du notebook</li>
+                                    <li>Prévoyez des cellules pour que les étudiants puissent compléter le code</li>
+                                    <li>Ajoutez des tests pour vérifier les réponses des étudiants</li>
+                                    <li>Indiquez aux étudiants comment sauvegarder une copie du notebook</li>
+                                </ul>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success btn-lg btn-block">
+                                <i class="fas fa-save"></i> Créer l'exercice
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        // Script pour prévisualiser l'URL Colab
+        $('#colab_url').on('change', function() {
+            var url = $(this).val();
+            if(url && url.includes('colab.research.google.com')) {
+                // Code pour prévisualiser l'URL si nécessaire
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -17,11 +17,11 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th>SN</th>
-                                    <th>Full Name</th>
+                                    <th>No</th>
+                                    <th>Nom Complet</th>
                                     <th>Email</th>
-                                    <th>Gender</th>
-                                    <th>Course</th>
+                                    <th>Genre</th>
+                                    <th>Filière</th>
                                     <th>Avatar</th>
                                     <th>Action</th>
                                 </tr>
@@ -36,13 +36,13 @@
                                     <td>{{student.student.course.name}}</td>
                                     <td>
                                         {% if student.profile_pic == ""  %}
-                                        No Image
+                                        Pas d'image
                                         {% else %}
                                         <img class="img img-fluid mb-2" height="100" width="100"
                                             src="{{student.profile_pic}}" alt="">
                                         {% endif %}
                                     </td>
-                                    <td><button data-toggle = "modal" data-target = "#myModal"class="btn btn-primary show_notification" value="{{student.id}}">Send Notification</button> 
+                                    <td><button data-toggle = "modal" data-target = "#myModal"class="btn btn-primary show_notification" value="{{student.id}}">Envoyer Notification</button> 
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -60,7 +60,7 @@
    <div class = "modal-dialog">
       <div class = "modal-content">
          
-         <div class = "modal-header">Send Notification
+         <div class = "modal-header">Envoyer Notification
             <button type = "button" class = "close" data-dismiss = "modal" aria-hidden = "true">
                   &times;
             </button>
@@ -77,11 +77,11 @@
          
          <div class = "modal-footer">
             <button type = "button" class = "btn btn-default" data-dismiss = "modal">
-               Close
+               Fermer
             </button>
             
             <button type = "button" id='send' class = "btn btn-success send_notification">
-               Send Notification
+               Envoyer Notification
             </button>
          </div>
          
@@ -112,15 +112,15 @@
            
                 
             if (response == 'True'){
-                alert("Notification Sent");
+                alert("Notification envoyée");
                 location.reload();
               }else{
-                alert("Notification could not be saved. Please try again.");
+                alert("La notification n'a pas pu être enregistrée. Veuillez réessayer.");
               }
                
            
         }).fail(function (response) {
-            alert("Error in saving token")
+            alert("Erreur lors de la sauvegarde")
         })
 
     }

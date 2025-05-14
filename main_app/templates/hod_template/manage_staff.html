@@ -17,13 +17,13 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th>SN</th>
-                                    <th>Full Name</th>
+                                    <th>No</th>
+                                    <th>Nom Complet</th>
                                     <th>Email</th>
-                                    <th>Gender</th>
-                                    <th>Course</th>
+                                    <th>Genre</th>
+                                    <th>Filière</th>
                                     <th>Avatar</th>
-                                    <th>Edit</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -36,15 +36,15 @@
                                     <td>{{staff.staff.course.name}}</td>
                                     <td>
                                         {% if staff.profile_pic == ""  %}
-                                        No Image
+                                        Pas d'image
                                         {% else %}
                                         <img class="img img-fluid mb-2" height="100" width="100"
                                             src="{{staff.profile_pic}}" alt="">
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a href="{% url 'edit_staff' staff.staff.id %}" class="btn btn-primary">Edit</a> - 
-                                        <a href="{% url 'delete_staff' staff.staff.id %}" class="btn btn-danger" onclick="return confirm('Are you sure about this ?')">Delete</a>
+                                        <a href="{% url 'edit_staff' staff.staff.id %}" class="btn btn-primary">Modifier</a> - 
+                                        <a href="{% url 'delete_staff' staff.staff.id %}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ?')">Supprimer</a>
                                     
                                     </td>
                                 </tr>

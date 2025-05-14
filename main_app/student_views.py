@@ -13,6 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.conf import settings
 from django.utils import timezone
+from django.db import models
+from django.db.models import Q
 
 from .forms import *
 from .models import *
@@ -34,6 +36,10 @@ def student_home(request):
     data_present = []
     data_absent = []
     subjects = Subject.objects.filter(course=student.course)
+    
+    # Pour chaque matière, récupérer ou créer le suivi de progression
+    progress_data = []
+    subject_progress = []
     for subject in subjects:
         attendance = Attendance.objects.filter(subject=subject)
         present_count = AttendanceReport.objects.filter(
@@ -43,6 +49,147 @@ def student_home(request):
         subject_name.append(subject.name)
         data_present.append(present_count)
         data_absent.append(absent_count)
+        
+        # Récupérer ou créer la progression pour cette matière
+        progress, created = StudentProgress.objects.get_or_create(
+            student=student,
+            subject=subject
+        )
+        
+        # Calculer la progression
+        materials = CourseMaterial.objects.filter(subject=subject, is_visible=True)
+        total_materials = materials.count()
+        
+        # Récupérer les devoirs de cette matière
+        assignments = Assignment.objects.filter(subject=subject, is_active=True)
+        total_assignments = assignments.count()
+        
+        # Total de ressources (matériels + devoirs)
+        total_resources = total_materials + total_assignments
+        
+        if total_resources > 0:
+            # Matériels complétés
+            completed_materials = MaterialProgress.objects.filter(
+                student=student,
+                material__in=materials,
+                is_completed=True
+            ).count()
+            
+            # Devoirs soumis
+            completed_assignments = AssignmentSubmission.objects.filter(
+                student=student,
+                assignment__in=assignments
+            ).count()
+            
+            # Total complété
+            total_completed = completed_materials + completed_assignments
+            
+            # Mettre à jour le pourcentage de progression
+            progress_percent = (total_completed / total_resources) * 100
+            progress.progress_percent = progress_percent
+            
+            # Mettre à jour le statut
+            if progress_percent == 0:
+                progress.status = 'not_started'
+            elif progress_percent < 100:
+                progress.status = 'in_progress'
+            else:
+                progress.status = 'completed'
+            
+            progress.save()
+        
+        # Ajouter aux données pour les graphiques
+        progress_data.append({
+            'subject': subject.name,
+            'progress': progress.progress_percent,
+            'status': progress.get_status_display(),
+            'color': '#28a745' if progress.status == 'completed' else '#ffc107' if progress.status == 'in_progress' else '#dc3545'
+        })
+        
+        subject_progress.append(progress.progress_percent)
+    
+    # Récupérer les devoirs/quiz à venir
+    upcoming_assignments = Assignment.objects.filter(
+        subject__in=subjects,
+        is_active=True,
+        due_date__gt=timezone.now()
+    ).order_by('due_date')[:5]  # Limiter aux 5 prochains
+    
+    # Vérifier les soumissions pour ces devoirs
+    assignments_with_status = []
+    for assignment in upcoming_assignments:
+        submission = AssignmentSubmission.objects.filter(
+            assignment=assignment,
+            student=student
+        ).first()
+        
+        # Calculer le délai restant
+        remaining_time = assignment.due_date - timezone.now()
+        days_remaining = remaining_time.days
+        hours_remaining = int(remaining_time.seconds / 3600)
+        
+        # État d'alerte basé sur le délai restant
+        alert_level = 'success'  # Par défaut
+        if not submission:
+            if days_remaining < 1:
+                alert_level = 'danger'
+            elif days_remaining < 3:
+                alert_level = 'warning'
+        
+        assignments_with_status.append({
+            'assignment': assignment,
+            'is_submitted': submission is not None,
+            'days_remaining': days_remaining,
+            'hours_remaining': hours_remaining,
+            'alert_level': alert_level
+        })
+    
+    # Calculer le temps d'étude recommandé pour chaque matière
+    study_time_recommendations = []
+    for subject in subjects:
+        total_estimated_time = CourseMaterial.objects.filter(
+            subject=subject, 
+            is_visible=True
+        ).aggregate(total=models.Sum('estimated_time'))['total'] or 0
+        
+        # Temps déjà passé
+        time_spent = MaterialProgress.objects.filter(
+            student=student,
+            material__subject=subject
+        ).aggregate(total=models.Sum('time_spent'))['total'] or 0
+        
+        # Temps restant
+        remaining_time = max(0, total_estimated_time - time_spent)
+        
+        study_time_recommendations.append({
+            'subject': subject.name,
+            'total_time': total_estimated_time,
+            'remaining_time': remaining_time,
+            'time_spent': time_spent,
+            'percent_complete': (time_spent / total_estimated_time * 100) if total_estimated_time > 0 else 0
+        })
+    
+    # Analyse des devoirs soumis par matière
+    assignment_stats = []
+    for subject in subjects:
+        total_assignments = Assignment.objects.filter(subject=subject, is_active=True).count()
+        completed_assignments = AssignmentSubmission.objects.filter(
+            student=student,
+            assignment__subject=subject
+        ).count()
+        
+        if total_assignments > 0:
+            completion_rate = (completed_assignments / total_assignments) * 100
+        else:
+            completion_rate = 0
+        
+        assignment_stats.append({
+            'subject': subject.name,
+            'total': total_assignments,
+            'completed': completed_assignments,
+            'completion_rate': completion_rate
+        })
+    
     context = {
         'total_attendance': total_attendance,
         'percent_present': percent_present,
@@ -52,8 +199,12 @@ def student_home(request):
         'data_present': data_present,
         'data_absent': data_absent,
         'data_name': subject_name,
-        'page_title': 'Student Homepage'
-
+        'page_title': 'Tableau de Bord Étudiant',
+        'progress_data': progress_data,
+        'subject_progress': subject_progress,
+        'upcoming_assignments': assignments_with_status,
+        'study_time_recommendations': study_time_recommendations,
+        'assignment_stats': assignment_stats
     }
     return render(request, 'student_template/home_content.html', context)
 
@@ -100,7 +251,7 @@ def student_feedback(request):
     context = {
         'form': form,
         'feedbacks': FeedbackStudent.objects.filter(student=student),
-        'page_title': 'Student Feedback'
+        'page_title': 'Retour Étudiant'
 
     }
     if request.method == 'POST':
@@ -110,12 +261,12 @@ def student_feedback(request):
                 obj.student = student
                 obj.save()
                 messages.success(
-                    request, "Feedback submitted for review")
+                    request, "Retour soumis pour examen")
                 return redirect(reverse('student_feedback'))
             except Exception:
-                messages.error(request, "Could not Submit!")
+                messages.error(request, "Impossible de soumettre!")
         else:
-            messages.error(request, "Form has errors!")
+            messages.error(request, "Le formulaire contient des erreurs!")
     return render(request, "student_template/student_feedback.html", context)
 
 
@@ -178,7 +329,7 @@ def student_view_notification(request):
     notifications = NotificationStudent.objects.filter(student=student)
     context = {
         'notifications': notifications,
-        'page_title': "View Notifications"
+        'page_title': "Voir les Notifications"
     }
     return render(request, "student_template/student_view_notification.html", context)
 
@@ -410,3 +561,344 @@ def student_view_submission(request, submission_id):
         'page_title': f'Soumission - {submission.assignment.title}'
     }
     return render(request, 'student_template/student_view_submission.html', context)
+
+# Messagerie
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_inbox(request):
+    student = get_object_or_404(Student, admin=request.user)
+    messages_received = Message.objects.filter(receiver=student.admin)
+    
+    # Marquer comme lus les messages ouverts
+    if 'message_id' in request.GET:
+        message_id = request.GET.get('message_id')
+        message = get_object_or_404(Message, id=message_id, receiver=student.admin)
+        message.is_read = True
+        message.save()
+    
+    context = {
+        'messages': messages_received,
+        'page_title': 'Messagerie - Boîte de réception'
+    }
+    return render(request, 'student_template/student_inbox.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_sent_messages(request):
+    student = get_object_or_404(Student, admin=request.user)
+    messages_sent = Message.objects.filter(sender=student.admin)
+    
+    context = {
+        'messages': messages_sent,
+        'page_title': 'Messagerie - Messages envoyés'
+    }
+    return render(request, 'student_template/student_sent_messages.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_compose_message(request):
+    student = get_object_or_404(Student, admin=request.user)
+    course = student.course
+    
+    # Récupérer les professeurs qui enseignent dans la filière de l'étudiant
+    staff_members = Staff.objects.filter(course=course)
+    
+    if request.method == 'POST':
+        receiver_id = request.POST.get('receiver')
+        subject = request.POST.get('subject')
+        content = request.POST.get('content')
+        attachment = request.FILES.get('attachment', None)
+        
+        if not receiver_id or not subject or not content:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            return redirect('student_compose_message')
+        
+        try:
+            receiver = CustomUser.objects.get(id=receiver_id)
+            
+            # Créer le message
+            message = Message(
+                sender=student.admin,
+                receiver=receiver,
+                subject=subject,
+                content=content,
+                attachment=attachment
+            )
+            message.save()
+            
+            messages.success(request, "Message envoyé avec succès.")
+            return redirect('student_sent_messages')
+            
+        except Exception as e:
+            messages.error(request, f"Une erreur s'est produite : {str(e)}")
+    
+    context = {
+        'staff_members': staff_members,
+        'page_title': 'Composer un message'
+    }
+    return render(request, 'student_template/student_compose_message.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_view_message(request, message_id):
+    student = get_object_or_404(Student, admin=request.user)
+    
+    # Utiliser filter et get au lieu de get_object_or_404 avec Q
+    try:
+        message = Message.objects.filter(
+            id=message_id
+        ).filter(
+            Q(sender=student.admin) | Q(receiver=student.admin)
+        ).get()
+    except Message.DoesNotExist:
+        messages.error(request, "Message non trouvé.")
+        return redirect('student_inbox')
+    
+    # Marquer comme lu si c'est un message reçu
+    if message.receiver == student.admin and not message.is_read:
+        message.is_read = True
+        message.save()
+    
+    context = {
+        'message': message,
+        'page_title': f'Message - {message.subject}'
+    }
+    return render(request, 'student_template/student_view_message.html', context)
+
+# Forums
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_forum_categories(request):
+    student = get_object_or_404(Student, admin=request.user)
+    
+    # Récupérer les catégories générales et celles de la filière de l'étudiant
+    categories = ForumCategory.objects.filter(
+        Q(course__isnull=True) | Q(course=student.course)
+    )
+    
+    context = {
+        'categories': categories,
+        'page_title': 'Forums de discussion'
+    }
+    return render(request, 'student_template/student_forum_categories.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_forum_topics(request, category_id):
+    student = get_object_or_404(Student, admin=request.user)
+    
+    # Utiliser filter et get au lieu de get_object_or_404 avec Q
+    try:
+        category = ForumCategory.objects.filter(
+            id=category_id
+        ).filter(
+            Q(course__isnull=True) | Q(course=student.course)
+        ).get()
+    except ForumCategory.DoesNotExist:
+        messages.error(request, "Catégorie non trouvée ou vous n'avez pas accès à cette catégorie.")
+        return redirect('student_forum_categories')
+    
+    topics = ForumTopic.objects.filter(category=category)
+    
+    context = {
+        'category': category,
+        'topics': topics,
+        'page_title': f'Forum - {category.name}'
+    }
+    return render(request, 'student_template/student_forum_topics.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_forum_topic_detail(request, topic_id):
+    student = get_object_or_404(Student, admin=request.user)
+    topic = get_object_or_404(ForumTopic, id=topic_id)
+    
+    # Vérifier que l'étudiant a accès à ce sujet
+    if not (topic.category.course is None or topic.category.course == student.course):
+        messages.error(request, "Vous n'avez pas accès à ce sujet.")
+        return redirect('student_forum_categories')
+    
+    # Incrémenter le compteur de vues
+    topic.views += 1
+    topic.save()
+    
+    replies = ForumReply.objects.filter(topic=topic)
+    
+    if request.method == 'POST' and not topic.is_closed:
+        content = request.POST.get('content')
+        
+        if content:
+            reply = ForumReply(
+                topic=topic,
+                content=content,
+                created_by=student.admin
+            )
+            reply.save()
+            
+            messages.success(request, "Votre réponse a été publiée.")
+            return redirect('student_forum_topic_detail', topic_id=topic.id)
+        else:
+            messages.error(request, "Le contenu de la réponse ne peut pas être vide.")
+    
+    context = {
+        'topic': topic,
+        'replies': replies,
+        'page_title': topic.title
+    }
+    return render(request, 'student_template/student_forum_topic_detail.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_create_topic(request, category_id):
+    student = get_object_or_404(Student, admin=request.user)
+    
+    # Utiliser filter et get au lieu de get_object_or_404 avec Q
+    try:
+        category = ForumCategory.objects.filter(
+            id=category_id
+        ).filter(
+            Q(course__isnull=True) | Q(course=student.course)
+        ).get()
+    except ForumCategory.DoesNotExist:
+        messages.error(request, "Catégorie non trouvée ou vous n'avez pas accès à cette catégorie.")
+        return redirect('student_forum_categories')
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        
+        if title and content:
+            topic = ForumTopic(
+                title=title,
+                content=content,
+                category=category,
+                created_by=student.admin
+            )
+            topic.save()
+            
+            messages.success(request, "Votre sujet a été créé avec succès.")
+            return redirect('student_forum_topic_detail', topic_id=topic.id)
+        else:
+            messages.error(request, "Veuillez remplir tous les champs.")
+    
+    context = {
+        'category': category,
+        'page_title': 'Créer un nouveau sujet'
+    }
+    return render(request, 'student_template/student_create_topic.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_colab_notebooks(request):
+    """Vue pour afficher la liste des notebooks Google Colab disponibles pour l'étudiant."""
+    student = get_object_or_404(Student, admin=request.user)
+    
+    # Récupérer les notebooks liés aux sujets des cours de l'étudiant
+    notebooks = GoogleColabNotebook.objects.filter(
+        subject__course=student.course,
+        is_visible=True
+    ).order_by('-created_at')
+    
+    # Récupérer les progrès de l'étudiant pour chaque notebook
+    student_progress = {}
+    for notebook in notebooks:
+        progress, created = ColabNotebookProgress.objects.get_or_create(
+            student=student,
+            notebook=notebook,
+            defaults={
+                'progress_percent': 0,
+                'is_completed': False
+            }
+        )
+        # Utiliser l'ID du notebook comme clé (int)
+        student_progress[notebook.id] = progress
+    
+    context = {
+        'notebooks': notebooks,
+        'student_progress': student_progress,
+        'page_title': 'Exercices Google Colab'
+    }
+    return render(request, 'student_template/student_colab_notebooks.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_view_colab_notebook(request, notebook_id):
+    """Vue pour afficher et utiliser un notebook Google Colab spécifique."""
+    student = get_object_or_404(Student, admin=request.user)
+    notebook = get_object_or_404(GoogleColabNotebook, id=notebook_id, is_visible=True)
+    
+    # Vérifier que le notebook appartient bien au cours de l'étudiant
+    if notebook.subject.course != student.course:
+        messages.error(request, "Vous n'êtes pas autorisé à accéder à ce notebook")
+        return redirect('student_colab_notebooks')
+    
+    # Récupérer ou créer le suivi de progression
+    progress, created = ColabNotebookProgress.objects.get_or_create(
+        student=student,
+        notebook=notebook,
+        defaults={
+            'progress_percent': 0,
+            'is_completed': False
+        }
+    )
+    
+    # Mettre à jour la date de dernier accès
+    progress.save()
+    
+    context = {
+        'notebook': notebook,
+        'progress': progress,
+        'page_title': notebook.title
+    }
+    return render(request, 'student_template/student_view_colab_notebook.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_update_colab_progress(request, notebook_id):
+    """Vue pour mettre à jour la progression d'un étudiant sur un notebook."""
+    if request.method != 'POST':
+        messages.error(request, "Méthode non autorisée")
+        return redirect('student_colab_notebooks')
+    
+    student = get_object_or_404(Student, admin=request.user)
+    notebook = get_object_or_404(GoogleColabNotebook, id=notebook_id)
+    
+    # Vérifier que le notebook appartient bien au cours de l'étudiant
+    if notebook.subject.course != student.course:
+        messages.error(request, "Vous n'êtes pas autorisé à accéder à ce notebook")
+        return redirect('student_colab_notebooks')
+    
+    progress_percent = request.POST.get('progress_percent')
+    is_completed = request.POST.get('is_completed') == 'true'
+    notes = request.POST.get('notes', '')
+    
+    try:
+        progress_percent = float(progress_percent)
+        if progress_percent < 0 or progress_percent > 100:
+            messages.error(request, "Le pourcentage de progression doit être entre 0 et 100")
+            return redirect('student_view_colab_notebook', notebook_id=notebook.id)
+    except ValueError:
+        messages.error(request, "Valeur de progression invalide")
+        return redirect('student_view_colab_notebook', notebook_id=notebook.id)
+    
+    # Mettre à jour la progression
+    progress, created = ColabNotebookProgress.objects.get_or_create(
+        student=student,
+        notebook=notebook,
+        defaults={
+            'progress_percent': 0,
+            'is_completed': False
+        }
+    )
+    
+    progress.progress_percent = progress_percent
+    progress.is_completed = is_completed
+    progress.notes = notes
+    
+    if is_completed and not progress.completed_date:
+        progress.completed_date = timezone.now()
+    
+    progress.save()
+    
+    messages.success(request, "Progression mise à jour avec succès")
+    return redirect('student_view_colab_notebook', notebook_id=notebook.id)

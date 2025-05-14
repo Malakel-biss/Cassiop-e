@@ -41,7 +41,7 @@ class Session(models.Model):
 
 class CustomUser(AbstractUser):
     USER_TYPE = ((1, "HOD"), (2, "Staff"), (3, "Student"))
-    GENDER = [("M", "Male"), ("F", "Female")]
+    GENDER = [("M", "Masculin"), ("F", "Féminin")]
     
     
     username = None  # Removed username, using email instead
@@ -192,6 +192,7 @@ class CourseMaterial(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     upload_date = models.DateTimeField(auto_now_add=True)
     is_visible = models.BooleanField(default=True)
+    estimated_time = models.IntegerField(default=30, help_text="Temps estimé en minutes")
 
     def __str__(self):
         return f"{self.title} - {self.subject.name}"
@@ -289,3 +290,142 @@ class QuizAnswer(models.Model):
 
     def __str__(self):
         return f"Réponse de {self.submission.student.admin.first_name} pour {self.question.text}"
+
+class StudentProgress(models.Model):
+    STATUS_CHOICES = (
+        ('not_started', 'Non commencé'),
+        ('in_progress', 'En cours'),
+        ('completed', 'Terminé'),
+    )
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    progress_percent = models.FloatField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('student', 'subject')
+        
+    def __str__(self):
+        return f"{self.student.admin.first_name} - {self.subject.name} ({self.get_status_display()})"
+
+class MaterialProgress(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    material = models.ForeignKey(CourseMaterial, on_delete=models.CASCADE)
+    is_completed = models.BooleanField(default=False)
+    time_spent = models.IntegerField(default=0, help_text="Temps passé en minutes")
+    completed_date = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('student', 'material')
+        
+    def __str__(self):
+        status = "Complété" if self.is_completed else "En cours"
+        return f"{self.student.admin.first_name} - {self.material.title} ({status})"
+
+class GoogleColabNotebook(models.Model):
+    """Modèle pour intégrer des exercices pratiques via Google Colab."""
+    
+    DIFFICULTY_CHOICES = (
+        ('beginner', 'Débutant'),
+        ('intermediate', 'Intermédiaire'),
+        ('advanced', 'Avancé'),
+    )
+    
+    title = models.CharField(max_length=200)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    description = models.TextField()
+    colab_url = models.URLField(help_text="URL du notebook Google Colab")
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='beginner')
+    created_by = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='colab_notebooks')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_visible = models.BooleanField(default=True)
+    estimated_time = models.IntegerField(default=60, help_text="Temps estimé en minutes")
+    keywords = models.CharField(max_length=255, blank=True, help_text="Mots-clés séparés par des virgules")
+    
+    def __str__(self):
+        return f"{self.title} - {self.subject.name} ({self.get_difficulty_display()})"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+class ColabNotebookProgress(models.Model):
+    """Suivi de la progression d'un étudiant sur un notebook Colab."""
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    notebook = models.ForeignKey(GoogleColabNotebook, on_delete=models.CASCADE)
+    is_completed = models.BooleanField(default=False)
+    progress_percent = models.FloatField(default=0)
+    last_accessed = models.DateTimeField(auto_now=True)
+    completed_date = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, help_text="Notes personnelles de l'étudiant sur ce notebook")
+    
+    class Meta:
+        unique_together = ('student', 'notebook')
+        
+    def __str__(self):
+        status = "Complété" if self.is_completed else "En cours"
+        return f"{self.student.admin.first_name} - {self.notebook.title} ({status})"
+
+class Message(models.Model):
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_messages')
+    subject = models.CharField(max_length=255)
+    content = models.TextField()
+    attachment = models.FileField(upload_to='message_attachments/', null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"De {self.sender.first_name} à {self.receiver.first_name}: {self.subject}"
+
+class ForumCategory(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = "Forum Categories"
+    
+    def __str__(self):
+        course_name = self.course.name if self.course else "Général"
+        return f"{self.name} ({course_name})"
+
+class ForumTopic(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    category = models.ForeignKey(ForumCategory, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_pinned = models.BooleanField(default=False)
+    is_closed = models.BooleanField(default=False)
+    views = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-is_pinned', '-created_at']
+    
+    def __str__(self):
+        return self.title
+
+class ForumReply(models.Model):
+    topic = models.ForeignKey(ForumTopic, on_delete=models.CASCADE, related_name='replies')
+    content = models.TextField()
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_solution = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['created_at']
+        verbose_name_plural = "Forum Replies"
+    
+    def __str__(self):
+        return f"Réponse de {self.created_by.first_name} sur {self.topic.title}"

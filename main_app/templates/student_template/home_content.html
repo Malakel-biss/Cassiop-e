@@ -1,9 +1,70 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block page_title %}{{page_title}}{% endblock page_title %}
 {% block content %}
 <section class="content">
     <div class="container-fluid">
+        <!-- Alertes pour les devoirs à venir -->
+        {% if upcoming_assignments %}
+        <div class="card card-dark">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bell mr-2"></i>Devoirs et quiz à venir
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped m-0">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Matière</th>
+                                <th>Date limite</th>
+                                <th>Temps restant</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in upcoming_assignments %}
+                            <tr>
+                                <td>{{ item.assignment.title }}</td>
+                                <td>{{ item.assignment.subject.name }}</td>
+                                <td>{{ item.assignment.due_date|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if item.days_remaining > 0 %}
+                                        {{ item.days_remaining }} jour(s) {{ item.hours_remaining }} heure(s)
+                                    {% else %}
+                                        {{ item.hours_remaining }} heure(s)
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.is_submitted %}
+                                        <span class="badge badge-success">Soumis</span>
+                                    {% else %}
+                                        <span class="badge badge-{{ item.alert_level }}">À faire</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'student_view_assignment' item.assignment.id %}" class="btn btn-sm btn-primary">
+                                        {% if item.is_submitted %}Voir{% else %}Soumettre{% endif %}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Small boxes (Stat box) -->
         <div class="row">
             <div class="col-lg-3 col-6">
@@ -12,12 +73,11 @@
                     <div class="inner">
                         <h3>{{total_attendance}}</h3>
 
-                        <p>Total Attendance</p>
+                        <p>Total Présences</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-bag"></i>
+                        <i class="fas fa-calendar-check"></i>
                     </div>
-                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
                 </div>
             </div>
             <!-- ./col -->
@@ -27,12 +87,11 @@
                     <div class="inner">
                         <h3>{{ percent_present }}<sup style="font-size: 20px">%</sup></h3>
 
-                        <p>Percentage Present</p>
+                        <p>Pourcentage Présence</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-person-add"></i>
+                        <i class="fas fa-user-check"></i>
                     </div>
-                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
                 </div>
             </div>
             <!-- ./col -->
@@ -42,12 +101,11 @@
                     <div class="inner">
                         <h3>{{percent_absent}}<sup style="font-size: 20px">%</sup></h3>
 
-                        <p>Percentage Absent</p>
+                        <p>Pourcentage Absence</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-stats-bars"></i>
+                        <i class="fas fa-user-times"></i>
                     </div>
-                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
                 </div>
             </div>
             <!-- ./col -->
@@ -57,231 +115,423 @@
                     <div class="inner">
                         <h3>{{total_subject}}</h3>
 
-                        <p>Total Subject</p>
+                        <p>Total Matières</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-pie-graph"></i>
+                        <i class="fas fa-book"></i>
                     </div>
-                    {# <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> #}
                 </div>
             </div>
             <!-- ./col -->
         </div>
-        <div class="row">
-            <div class="col-lg-6">
-           
-                        <!-- DONUT CHART -->
-                        <div class="card card-secondary">
-                          <div class="card-header">
-                            <h3 class="card-title">{{page_title}}</h3>
-            
-                            <div class="card-tools">
-                              <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                              </button>
-                              <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
-                            </div>
-                          </div>
-                          <div class="card-body">
-                            <canvas id="attendanceData" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                          </div>
-                          <!-- /.card-body -->
-                        </div>
-                        <!-- /.card -->
+
+        <!-- Progression des cours -->
+        <div class="card card-secondary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-tasks mr-2"></i>Progression des cours
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
             </div>
-                  
-            <div class="col-lg-6">
+            <div class="card-body">
+                <div class="chart">
+                    <canvas id="courseProgressChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+                
+                <div class="mt-4">
+                    {% for progress in progress_data %}
+                    <div class="progress-group">
+                        <span class="progress-text">{{ progress.subject }}</span>
+                        <span class="float-right"><b>{{ progress.progress|floatformat:0 }}%</b></span>
+                        <div class="progress progress-sm">
+                            <div class="progress-bar" style="width: {{ progress.progress|floatformat:0 }}%; background-color: {{ progress.color }}"></div>
+                        </div>
+                        <small class="text-muted">{{ progress.status }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Temps d'étude recommandé -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-clock mr-2"></i>Temps d'étude recommandé
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Matière</th>
+                                    <th>Temps restant</th>
+                                    <th>Temps passé</th>
+                                    <th>Progression</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for time in study_time_recommendations %}
+                                <tr>
+                                    <td>{{ time.subject }}</td>
+                                    <td>
+                                        {% if time.remaining_time > 60 %}
+                                            {{ time.remaining_time|divisibleby:60 }} h {{ time.remaining_time|modulo:60 }} min
+                                        {% else %}
+                                            {{ time.remaining_time|floatformat:0 }} min
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if time.time_spent > 60 %}
+                                            {{ time.time_spent|divisibleby:60 }} h {{ time.time_spent|modulo:60 }} min
+                                        {% else %}
+                                            {{ time.time_spent|floatformat:0 }} min
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar bg-info" style="width: {{ time.percent_complete|floatformat:0 }}%"></div>
+                                        </div>
+                                        <small>{{ time.percent_complete|floatformat:0 }}% complété</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             
-                        <div class="card card-secondary">
-                          <div class="card-header">
-                            <h3 class="card-title">{{page_title}}</h3>
+            <div class="col-md-6">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie mr-2"></i>Présence par matière
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="attendanceData" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Évolution des devoirs -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-file-alt mr-2"></i>Devoirs par matière
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="assignmentStatsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
             
-                            <div class="card-tools">
-                              <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                              </button>
-                              <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
-                            </div>
-                          </div>
-                          <div class="card-body">
-                            <div class="chart">
-                              <canvas id="attendanceStatistics" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                          <!-- /.card-body -->
-                        <!-- /.card -->
-                        </div> 
+            <div class="col-md-6">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-bar mr-2"></i>Statistiques de présence
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
                         </div>
-                        </div>
-                        </div>
-                        </div>
-                        </div>  
-                        </section>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="attendanceStatistics" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock content %}
 
 {% block custom_js %}
-  <script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
 $(document).ready(function(){
-
-    //Dataset
-    var subjects = {{data_name|safe}}
-    var data_present = {{data_present}}
-    var data_absent = {{data_absent}}
-
-    //-------------
-    //- DONUT CHART -
-    var attendanceDataCanvas = $('#attendanceData').get(0).getContext('2d')
-    var donutData        = {
-      labels: [
-         'Present', 'Absent'
-      ],
-      datasets: [
-        {
-          data: [{{percent_present}}, {{percent_absent}}],
-          backgroundColor : ['#00a65a','#f56954'],
-        }
-      ]
-    }
-    var donutOptions     = {
-      maintainAspectRatio : false,
-      responsive : true,
-    }
-    var attendanceData = new Chart(attendanceDataCanvas, {
-      type: 'doughnut',
-      data: donutData,
-      options: donutOptions      
-    });
-
-    //attendanceStatistics
-//Bar Chart
-var areaChartData = {
-    labels  : subjects,
-    datasets: [
-    {
-        label               : 'Present In Class',
-        backgroundColor     : 'rgba(60,141,188,0.9)',
-        borderColor         : 'rgba(60,141,188,0.8)',
-        pointRadius          : false,
-        pointColor          : '#3b8bba',
-        pointStrokeColor    : 'rgba(60,141,188,1)',
-        pointHighlightFill  : '#fff',
-        pointHighlightStroke: 'rgba(60,141,188,1)',
-        data                : data_present
-      },
-
-      {
-        label               : 'Absent In Class',
-        backgroundColor     : 'rgba(210, 214, 222, 1)',
-        borderColor         : 'rgba(210, 214, 222, 1)',
-        pointRadius         : false,
-        pointColor          : 'rgba(210, 214, 222, 1)',
-        pointStrokeColor    : '#c1c7d1',
-        pointHighlightFill  : '#fff',
-        pointHighlightStroke: 'rgba(220,220,220,1)',
-        data                : data_absent
-      },
-    ]
-  }
-var barChartCanvas = $('#attendanceStatistics').get(0).getContext('2d')
-var barChartData = jQuery.extend(true, {}, areaChartData)
-var temp = areaChartData.datasets[0]
-barChartData.datasets[0] = temp
-var barChartOptions = {
-  responsive              : true,
-  maintainAspectRatio     : false,
-  datasetFill             : false
-}
-
-var barChart = new Chart(barChartCanvas, {
-  type: 'bar', 
-  data: barChartData,
-  options: barChartOptions
-})
-
- 
-})
-
-  </script>
-        <!-- The core Firebase JS SDK is always required and must be listed first -->
-        <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
-
-        <!-- TODO: Add SDKs for Firebase products that you want to use
-         https://firebase.google.com/docs/web/setup#available-libraries -->
-        <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-analytics.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-messaging.js"></script>
+    // Ensemble de données
+    var subjects = {{data_name|safe}};
+    var data_present = {{data_present}};
+    var data_absent = {{data_absent}};
+    var subjectProgress = {{subject_progress}};
+    var progressLabels = [];
+    var progressData = [];
+    var progressColors = [];
     
+    {% for progress in progress_data %}
+    progressLabels.push("{{ progress.subject }}");
+    progressData.push({{ progress.progress|floatformat:0 }});
+    progressColors.push("{{ progress.color }}");
+    {% endfor %}
+
+    // Statistiques des devoirs
+    var assignmentLabels = [];
+    var completedAssignments = [];
+    var remainingAssignments = [];
     
-        <script>
-            // Your web app's Firebase configuration
-            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-            var firebaseConfig = {
-                apiKey: "AIzaSyBarDWWHTfTMSrtc5Lj3Cdw5dEvjAkFwtM",
-                authDomain: "sms-with-django.firebaseapp.com",
-                databaseURL: "https://sms-with-django.firebaseio.com",
-                projectId: "sms-with-django",
-                storageBucket: "sms-with-django.appspot.com",
-                messagingSenderId: "945324593139",
-                appId: "1:945324593139:web:03fa99a8854bbd38420c86",
-                measurementId: "G-2F2RXTL9GT"
-            };
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig)
-            const messaging = firebase.messaging();
-            function InitializeFireBaseMessaging() {
-                messaging
-                    .requestPermission()
-                    .then(function () {
-                        console.log("Notification Permission");
-                        return messaging.getToken();
-                    })
-                    .then(function (token) {
-                        console.log("Token : " + token);
-                        sendToServer(token);
-                    })
-                    .catch(function (reason) {
-                        console.log(reason)
-                    })
-            }
-            messaging.onMessage(function (payload) {
-                const notificationOption = {
-                    body: payload.notification.body,
-                    icon: payload.notification.icon,
+    {% for stat in assignment_stats %}
+    assignmentLabels.push("{{ stat.subject }}");
+    completedAssignments.push({{ stat.completed }});
+    remainingAssignments.push({{ stat.total }} - {{ stat.completed }});
+    {% endfor %}
+
+    // Graphique de progression des cours
+    var courseProgressCanvas = $('#courseProgressChart').get(0).getContext('2d');
+    var courseProgressData = {
+        labels: progressLabels,
+        datasets: [{
+            label: 'Progression (%)',
+            data: progressData,
+            backgroundColor: progressColors,
+            borderColor: progressColors,
+            borderWidth: 1
+        }]
+    };
     
-                }
-                if (Notification.permission == 'granted') {
-                    var notification = new Notification(payload.notification.title, notificationOption);
-                    notification.onclick = function (event) {
-                        event.preventDefault();
-                        window.open(payload.notification.click_action, "_blank");
-                        notification.close();
+    var courseProgressOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
                     }
                 }
-                console.log(payload);
-            });
-            messaging.onTokenRefresh(function () {
-                messaging.getToken()
-                    .then(function (newToken) {
-                        console.log("New Token : " + newToken);
-                        sendToServer(newToken);
-  
-                    })
-                    .catch(function (reason) {
-                        console.log(reason)
-                    })
-            })
-    
-            function sendToServer(token){
-              $.ajax({
-                url: "{% url 'student_fcmtoken' %}",
-                type: 'POST',
-                data: {
-                    token: token,
-                }
-            }).done(function (response) {
-               
-      
-               
-            }).fail(function (response) {
-            })
-  
             }
-            
-            InitializeFireBaseMessaging();
-        </script>
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': ' + context.raw + '%';
+                    }
+                }
+            }
+        }
+    };
+    
+    new Chart(courseProgressCanvas, {
+        type: 'bar',
+        data: courseProgressData,
+        options: courseProgressOptions
+    });
+
+    // Graphique de présence (Donut)
+    var attendanceDataCanvas = $('#attendanceData').get(0).getContext('2d');
+    var donutData = {
+        labels: ['Présent', 'Absent'],
+        datasets: [{
+            data: [{{percent_present}}, {{percent_absent}}],
+            backgroundColor: ['#28a745', '#dc3545']
+        }]
+    };
+    
+    var donutOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    };
+    
+    new Chart(attendanceDataCanvas, {
+        type: 'doughnut',
+        data: donutData,
+        options: donutOptions
+    });
+
+    // Graphique des statistiques de présence (Bar)
+    var barChartCanvas = $('#attendanceStatistics').get(0).getContext('2d');
+    var barData = {
+        labels: subjects,
+        datasets: [{
+            label: 'Présent',
+            backgroundColor: 'rgba(40, 167, 69, 0.8)',
+            borderColor: 'rgba(40, 167, 69, 1)',
+            borderWidth: 1,
+            data: data_present
+        }, {
+            label: 'Absent',
+            backgroundColor: 'rgba(220, 53, 69, 0.8)',
+            borderColor: 'rgba(220, 53, 69, 1)',
+            borderWidth: 1,
+            data: data_absent
+        }]
+    };
+    
+    var barOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        scales: {
+            x: {
+                stacked: false
+            },
+            y: {
+                stacked: false
+            }
+        }
+    };
+    
+    new Chart(barChartCanvas, {
+        type: 'bar',
+        data: barData,
+        options: barOptions
+    });
+
+    // Graphique des devoirs
+    var assignmentStatsCanvas = $('#assignmentStatsChart').get(0).getContext('2d');
+    var assignmentData = {
+        labels: assignmentLabels,
+        datasets: [{
+            label: 'Complétés',
+            backgroundColor: 'rgba(40, 167, 69, 0.8)',
+            borderColor: 'rgba(40, 167, 69, 1)',
+            borderWidth: 1,
+            data: completedAssignments
+        }, {
+            label: 'À faire',
+            backgroundColor: 'rgba(255, 193, 7, 0.8)',
+            borderColor: 'rgba(255, 193, 7, 1)',
+            borderWidth: 1,
+            data: remainingAssignments
+        }]
+    };
+    
+    var assignmentOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        scales: {
+            x: {
+                stacked: true
+            },
+            y: {
+                stacked: true
+            }
+        }
+    };
+    
+    new Chart(assignmentStatsCanvas, {
+        type: 'bar',
+        data: assignmentData,
+        options: assignmentOptions
+    });
+});
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-messaging.js"></script>
+
+<script>
+    // Configuration Firebase
+    var firebaseConfig = {
+        apiKey: "AIzaSyBarDWWHTfTMSrtc5Lj3Cdw5dEvjAkFwtM",
+        authDomain: "sms-with-django.firebaseapp.com",
+        databaseURL: "https://sms-with-django.firebaseio.com",
+        projectId: "sms-with-django",
+        storageBucket: "sms-with-django.appspot.com",
+        messagingSenderId: "945324593139",
+        appId: "1:945324593139:web:03fa99a8854bbd38420c86",
+        measurementId: "G-2F2RXTL9GT"
+    };
+    
+    // Initialiser Firebase
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+    
+    function InitializeFireBaseMessaging() {
+        messaging
+            .requestPermission()
+            .then(function () {
+                console.log("Notification Permission");
+                return messaging.getToken();
+            })
+            .then(function (token) {
+                console.log("Token : " + token);
+                sendToServer(token);
+            })
+            .catch(function (reason) {
+                console.log(reason);
+            });
+    }
+    
+    messaging.onMessage(function (payload) {
+        const notificationOption = {
+            body: payload.notification.body,
+            icon: payload.notification.icon
+        };
+        
+        if (Notification.permission == 'granted') {
+            var notification = new Notification(payload.notification.title, notificationOption);
+            notification.onclick = function (event) {
+                event.preventDefault();
+                window.open(payload.notification.click_action, "_blank");
+                notification.close();
+            };
+        }
+        console.log(payload);
+    });
+    
+    messaging.onTokenRefresh(function () {
+        messaging.getToken()
+            .then(function (newToken) {
+                console.log("New Token : " + newToken);
+                sendToServer(newToken);
+            })
+            .catch(function (reason) {
+                console.log(reason);
+            });
+    });
+
+    function sendToServer(token) {
+        $.ajax({
+            url: "{% url 'student_fcmtoken' %}",
+            type: 'POST',
+            data: {
+                token: token
+            }
+        }).done(function (response) {
+            // Rien à faire ici
+        }).fail(function (response) {
+            // Gestion des erreurs
+        });
+    }
+    
+    InitializeFireBaseMessaging();
+</script>
 {% endblock custom_js %}
