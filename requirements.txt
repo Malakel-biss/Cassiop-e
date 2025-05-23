@@ -5,5 +5,8 @@ dj-database-url==0.5.0
 gunicorn==20.0.4
 psycopg2==2.8.6
 whitenoise==5.2.0
-Pillow==7.2.0
+Pillow==9.5.0
 requests==2.24.0
+celery==5.2.7
+redis==4.5.5
+faster-whisper==1.1.0

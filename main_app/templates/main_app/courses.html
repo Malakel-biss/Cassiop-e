@@ -1,0 +1,37 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Nos Cours</h2>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for course in courses %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                {% if course.icon %}
+                    <img src="{{ course.icon.url }}" class="card-img-top p-3" alt="{{ course.name }}" style="height: 200px; object-fit: contain;">
+                {% else %}
+                    <div class="card-img-top p-3 d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                        <i class="fas fa-book fa-4x text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}</h5>
+                    {% if course.description %}
+                        <p class="card-text">{{ course.description|truncatewords:30 }}</p>
+                    {% endif %}
+                    <a href="{% url 'lessons_list' course.id %}" class="btn btn-primary">Voir les leçons</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Aucun cours disponible pour le moment.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 
