@@ -68,11 +68,30 @@ class Admin(models.Model):
 
 class Course(models.Model):
     name = models.CharField(max_length=120)
+    icon = models.ImageField(upload_to='course_icons/', null=True, blank=True)
+    description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+
+class Lesson(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    video = models.FileField(upload_to='lessons/videos/', null=True, blank=True)
+    pdf = models.FileField(upload_to='lessons/pdfs/', null=True, blank=True)
+    order = models.PositiveIntegerField(default=0, help_text='Order of the lesson in the course')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.course.name})"
 
 
 class Student(models.Model):
@@ -429,3 +448,16 @@ class ForumReply(models.Model):
     
     def __str__(self):
         return f"Réponse de {self.created_by.first_name} sur {self.topic.title}"
+
+class ChatMessage(models.Model):
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='chat_messages')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    message = models.TextField()
+    is_bot = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{'Bot' if self.is_bot else self.user.email}: {self.message[:50]}"

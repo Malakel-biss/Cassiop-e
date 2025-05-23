@@ -902,3 +902,9 @@ def student_update_colab_progress(request, notebook_id):
     
     messages.success(request, "Progression mise à jour avec succès")
     return redirect('student_view_colab_notebook', notebook_id=notebook.id)
+
+@login_required(login_url='login')
+@user_passes_test(is_student)
+def student_courses(request):
+    courses = Course.objects.prefetch_related('lessons').all()
+    return render(request, 'student_template/courses.html', {'courses': courses})

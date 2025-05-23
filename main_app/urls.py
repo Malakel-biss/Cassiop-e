@@ -177,5 +177,9 @@ urlpatterns = [
     path('student/assignments/', student_views.student_assignments, name='student_assignments'),
     path('student/view_assignment/<int:assignment_id>/', student_views.student_view_assignment, name='student_view_assignment'),
     path('student/view_submission/<int:submission_id>/', student_views.student_view_submission, name='student_view_submission'),
-
+    path('student/courses/', views.courses_view, name='courses'),
+    path('student/courses/<int:course_id>/lessons/', views.lessons_list_view, name='lessons_list'),
+    path('student/courses/<int:course_id>/lessons/<int:lesson_id>/', views.lesson_detail_view, name='lesson_detail'),
+    path('student/courses/<int:course_id>/lessons/<int:lesson_id>/chat/', views.chat_message, name='chat_message'),
+    path('student/courses/<int:course_id>/add-lesson/', views.add_lesson, name='add_lesson'),
 ]
