@@ -123,6 +123,47 @@ messaging.setBackgroundMessageHandler(function (payload) {
 def staff_iot_devices(request):
     """Vue pour lister et gérer les appareils IoT"""
     staff = get_object_or_404(Staff, admin=request.user)
+    
+    if request.method == 'POST':
+        try:
+            # Récupérer les données du formulaire
+            name = request.POST.get('name')
+            device_type = request.POST.get('device_type')
+            subject_id = request.POST.get('subject')
+            location = request.POST.get('location', '')
+            description = request.POST.get('description', '')
+            
+            # Valider les données
+            if not all([name, device_type, subject_id]):
+                return JsonResponse({'status': 'error', 'message': 'Tous les champs obligatoires doivent être remplis'})
+            
+            # Récupérer la matière
+            subject = get_object_or_404(Subject, id=subject_id, staff=staff)
+            
+            # Générer un ID unique pour l'appareil
+            device_id = f'DEVICE_{int(time.time())}'
+            
+            # Créer l'appareil
+            device = IoTDevice.objects.create(
+                name=name,
+                device_id=device_id,
+                device_type=device_type,
+                description=description,
+                location=location,
+                subject=subject,
+                created_by=staff,
+                status='active',
+                learning_objective="Analyse des données en temps réel pour comprendre les concepts fondamentaux",
+                expected_outcomes="Compréhension des patterns de données et capacité à interpréter les résultats",
+                difficulty_level='intermediate'
+            )
+            
+            return JsonResponse({'status': 'success', 'device_id': device.id})
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    # GET request - afficher la liste des appareils
     devices = IoTDevice.objects.filter(created_by=staff).select_related('subject')
     
     context = {
