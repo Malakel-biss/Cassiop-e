@@ -1021,12 +1021,23 @@ def staff_view_student_progress(request, notebook_id):
     
     # Récupérer les étudiants de la filière correspondant au module
     students = Student.objects.filter(course=staff.course)
+    total_students = students.count()
     
     # Récupérer les progressions pour ce notebook
     progresses = ColabNotebookProgress.objects.filter(
         notebook=notebook,
         student__in=students
     )
+    
+    # Calculer les statistiques
+    completed_count = progresses.filter(is_completed=True).count()
+    in_progress_count = progresses.filter(is_completed=False, progress_percent__gt=0).count()
+    not_started_count = total_students - completed_count - in_progress_count
+    
+    # Calculer les pourcentages
+    completed_percent = (completed_count / total_students * 100) if total_students > 0 else 0
+    in_progress_percent = (in_progress_count / total_students * 100) if total_students > 0 else 0
+    not_started_percent = (not_started_count / total_students * 100) if total_students > 0 else 0
     
     # Créer un dictionnaire pour associer chaque étudiant à sa progression
     student_progresses = {}
@@ -1039,7 +1050,10 @@ def staff_view_student_progress(request, notebook_id):
                 'is_completed': False,
                 'last_accessed': None,
                 'completed_date': None,
-                'notes': ''
+                'notes': '',
+                'personal_colab_url': '',
+                'score': None,
+                'feedback': ''
             }
         else:
             student_progresses[student] = {
@@ -1047,12 +1061,59 @@ def staff_view_student_progress(request, notebook_id):
                 'is_completed': progress.is_completed,
                 'last_accessed': progress.last_accessed,
                 'completed_date': progress.completed_date,
-                'notes': progress.notes
+                'notes': progress.notes,
+                'personal_colab_url': progress.personal_colab_url,
+                'score': progress.score,
+                'feedback': progress.feedback
             }
+    
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        score = request.POST.get('score')
+        feedback = request.POST.get('feedback')
+        
+        try:
+            student = get_object_or_404(Student, id=student_id)
+            progress = ColabNotebookProgress.objects.get(notebook=notebook, student=student)
+            
+            if score:
+                try:
+                    score = float(score)
+                    if 0 <= score <= 20:  # Vérifier que la note est entre 0 et 20
+                        progress.score = score
+                    else:
+                        messages.error(request, "La note doit être comprise entre 0 et 20")
+                        return redirect('staff_view_student_progress', notebook_id=notebook.id)
+                except ValueError:
+                    messages.error(request, "La note doit être un nombre")
+                    return redirect('staff_view_student_progress', notebook_id=notebook.id)
+            
+            progress.feedback = feedback
+            progress.save()
+            
+            messages.success(request, "Note et commentaires enregistrés avec succès")
+            return redirect('staff_view_student_progress', notebook_id=notebook.id)
+            
+        except Exception as e:
+            messages.error(request, f"Erreur lors de l'enregistrement : {str(e)}")
     
     context = {
         'notebook': notebook,
         'student_progresses': student_progresses,
+        'stats': {
+            'completed': {
+                'count': completed_count,
+                'percent': round(completed_percent, 1)
+            },
+            'in_progress': {
+                'count': in_progress_count,
+                'percent': round(in_progress_percent, 1)
+            },
+            'not_started': {
+                'count': not_started_count,
+                'percent': round(not_started_percent, 1)
+            }
+        },
         'page_title': f'Progression des étudiants - {notebook.title}'
     }
     return render(request, 'staff_template/staff_view_student_progress.html', context)

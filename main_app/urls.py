@@ -178,4 +178,18 @@ urlpatterns = [
     path('student/view_assignment/<int:assignment_id>/', student_views.student_view_assignment, name='student_view_assignment'),
     path('student/view_submission/<int:submission_id>/', student_views.student_view_submission, name='student_view_submission'),
 
+    # URLs pour les appareils IoT (Staff)
+    path('staff/iot-devices/', views.staff_iot_devices, name='staff_iot_devices'),
+    path('staff/iot-devices/<int:device_id>/', views.staff_iot_device_detail, name='staff_iot_device_detail'),
+    path('staff/iot-devices/<int:device_id>/analysis/', views.staff_iot_analysis, name='staff_iot_analysis'),
+    path('staff/iot-devices/simulate-cpu/', views.simulate_cpu_temperature, name='simulate_cpu_temperature'),
+    path('staff/iot-devices/simulate-system/', views.simulate_system_sensor, name='simulate_system_sensor'),
+    
+    # URLs pour les appareils IoT (Students)
+    path('student/iot-devices/', views.student_iot_devices, name='student_iot_devices'),
+    path('student/iot-devices/<int:device_id>/', views.student_iot_device_detail, name='student_iot_device_detail'),
+    
+    # API endpoints pour les données IoT
+    path('api/iot-data/', views.api_iot_data, name='api_iot_data'),
+    path('api/iot-device/<int:device_id>/data/', views.api_iot_device_data, name='api_iot_device_data'),
 ]

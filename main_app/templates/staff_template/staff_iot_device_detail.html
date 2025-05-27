@@ -1,0 +1,230 @@
+{% extends 'staff_template/staff_base.html' %}
+{% load static %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-microchip"></i> {{ device.name }}
+                </h3>
+                <div class="float-right">
+                    <a href="{% url 'staff_iot_devices' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Informations sur l'appareil -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4>Informations sur l'appareil</h4>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Type</th>
+                                <td>{{ device.get_device_type_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td><code>{{ device.device_id }}</code></td>
+                            </tr>
+                            <tr>
+                                <th>Matière</th>
+                                <td>{{ device.subject.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Statut</th>
+                                <td>
+                                    <span class="badge badge-{% if device.status == 'active' %}success{% elif device.status == 'maintenance' %}warning{% else %}danger{% endif %}">
+                                        {{ device.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Emplacement</th>
+                                <td>{{ device.location|default:"Non spécifié" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Description</th>
+                                <td>{{ device.description|default:"Aucune description" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Statistiques</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-box bg-info">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Moyenne</span>
+                                        <span class="info-box-number">{{ stats.avg_value|floatformat:2 }}</span>
+                                        <span class="info-box-text">{{ device.unit }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-success">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Maximum</span>
+                                        <span class="info-box-number">{{ stats.max_value|floatformat:2 }}</span>
+                                        <span class="info-box-text">{{ device.unit }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-warning">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Minimum</span>
+                                        <span class="info-box-number">{{ stats.min_value|floatformat:2 }}</span>
+                                        <span class="info-box-text">{{ device.unit }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-danger">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Nombre de mesures</span>
+                                        <span class="info-box-number">{{ stats.count }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphique des données -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h4>Données en temps réel</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="dataChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dernières données -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Dernières données reçues</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Valeur</th>
+                                        <th>Unité</th>
+                                        <th>Métadonnées</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in latest_data %}
+                                    <tr>
+                                        <td>{{ data.timestamp|date:"d/m/Y H:i:s" }}</td>
+                                        <td>{{ data.value|floatformat:2 }}</td>
+                                        <td>{{ data.unit }}</td>
+                                        <td>
+                                            {% if data.metadata %}
+                                                <button type="button" class="btn btn-sm btn-info" data-toggle="popover" data-content="{{ data.metadata|pprint }}">
+                                                    <i class="fas fa-info-circle"></i> Voir
+                                                </button>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">
+                                            <p class="text-muted">Aucune donnée n'a été reçue.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialiser les popovers
+    $('[data-toggle="popover"]').popover({
+        trigger: 'hover',
+        html: true
+    });
+    
+    // Initialiser DataTables
+    $('.table').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+        },
+        "order": [[0, "desc"]]
+    });
+    
+    // Préparer les données pour le graphique
+    const timestamps = [{% for data in latest_data %}"{{ data.timestamp|date:'Y-m-d H:i:s' }}"{% if not forloop.last %}, {% endif %}{% endfor %}].reverse();
+    const values = [{% for data in latest_data %}{{ data.value }}{% if not forloop.last %}, {% endif %}{% endfor %}].reverse();
+    
+    // Créer le graphique
+    const ctx = document.getElementById('dataChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: '{{ device.name }}',
+                data: values,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'DD/MM HH:mm'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '{{ device.unit }}'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Mettre à jour les données toutes les 30 secondes
+    setInterval(function() {
+        $.get('{% url "staff_iot_device_detail" device.id %}', function(data) {
+            // TODO: Mettre à jour le graphique avec les nouvelles données
+        });
+    }, 30000);
+});
+</script>
+{% endblock %} 

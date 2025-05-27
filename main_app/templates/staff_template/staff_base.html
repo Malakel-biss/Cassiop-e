@@ -14,6 +14,18 @@
             <span>Supports de Cours</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a href="{% url 'staff_colab_notebooks' %}" class="nav-link {% if request.path == staff_colab_notebooks %} active {% endif %}">
+            <i class="nav-icon fas fa-book"></i>
+            <p>Google Colab</p>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{% url 'staff_iot_devices' %}" class="nav-link {% if 'staff/iot-devices' in request.path %} active {% endif %}">
+            <i class="nav-icon fas fa-microchip"></i>
+            <p>Appareils IoT</p>
+        </a>
+    </li>
     {% endblock %}
 </div>
 {% endblock %} 
