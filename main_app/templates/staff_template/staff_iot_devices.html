@@ -172,21 +172,47 @@ $(document).ready(function() {
     $('#addDeviceForm').on('submit', function(e) {
         e.preventDefault();
         
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalBtnText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Ajout en cours...');
+        
         $.ajax({
             url: '{% url "staff_iot_devices" %}',
             method: 'POST',
             data: $(this).serialize(),
             success: function(response) {
                 if (response.status === 'success') {
+                    // Fermer le modal
+                    $('#addDeviceModal').modal('hide');
+                    // Recharger la page pour afficher le nouvel appareil
                     window.location.reload();
                 } else {
-                    alert('Erreur lors de l\'ajout de l\'appareil');
+                    // Afficher le message d'erreur
+                    alert(response.message || 'Erreur lors de l\'ajout de l\'appareil');
+                    submitBtn.prop('disabled', false).html(originalBtnText);
                 }
             },
-            error: function() {
-                alert('Erreur lors de l\'ajout de l\'appareil');
+            error: function(xhr) {
+                let errorMessage = 'Erreur lors de l\'ajout de l\'appareil';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.message) {
+                        errorMessage = response.message;
+                    }
+                } catch (e) {
+                    console.error('Erreur lors du parsing de la réponse:', e);
+                }
+                alert(errorMessage);
+                submitBtn.prop('disabled', false).html(originalBtnText);
             }
         });
+    });
+    
+    // Réinitialiser le formulaire quand le modal est fermé
+    $('#addDeviceModal').on('hidden.bs.modal', function() {
+        $('#addDeviceForm')[0].reset();
+        const submitBtn = $('#addDeviceForm').find('button[type="submit"]');
+        submitBtn.prop('disabled', false).html('Ajouter');
     });
 });
 
