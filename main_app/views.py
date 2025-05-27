@@ -20,11 +20,7 @@ from django.db.models import Avg, Max, Min, Count
 from django.db.models.functions import Trunc
 
 from .EmailBackend import EmailBackend
-<<<<<<< HEAD
-from .models import Attendance, Session, Subject, Course, Lesson, ChatMessage
-=======
 from .models import Attendance, Session, Subject, IoTDevice, IoTData, IoTAnalysis, Staff, Student
->>>>>>> develop
 
 # Create your views here.
 
@@ -123,121 +119,6 @@ messaging.setBackgroundMessageHandler(function (payload) {
     """
     return HttpResponse(data, content_type='application/javascript')
 
-<<<<<<< HEAD
-def student_panneau(request):
-    return render(request, 'main_app/panneau.html')
-
-def courses_view(request):
-    courses = Course.objects.all()
-    context = {
-        'courses': courses
-    }
-    return render(request, 'main_app/courses.html', context)
-
-def lessons_list_view(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    lessons = course.lessons.all().order_by('order')
-    context = {
-        'course': course,
-        'lessons': lessons
-    }
-    return render(request, 'main_app/lessons_list.html', context)
-
-def lesson_detail_view(request, course_id, lesson_id):
-    lesson = get_object_or_404(Lesson, id=lesson_id, course_id=course_id)
-    context = {
-        'lesson': lesson
-    }
-    return render(request, 'main_app/lesson_detail.html', context)
-
-@csrf_exempt
-def chat_message(request, lesson_id):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            message = data.get('message')
-            lesson = get_object_or_404(Lesson, id=lesson_id)
-            
-            # Save user message
-            ChatMessage.objects.create(
-                lesson=lesson,
-                user=request.user,
-                message=message,
-                is_bot=False
-            )
-            
-            # Generate bot response (you can integrate with any AI service here)
-            bot_response = generate_bot_response(message, lesson)
-            
-            # Save bot response
-            ChatMessage.objects.create(
-                lesson=lesson,
-                user=request.user,
-                message=bot_response,
-                is_bot=True
-            )
-            
-            return JsonResponse({'response': bot_response})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-def generate_bot_response(message, lesson):
-    """
-    Generate a response for the chatbot.
-    This is a simple implementation - you can replace it with an AI service.
-    """
-    # Simple keyword-based responses
-    message = message.lower()
-    
-    if 'help' in message or 'aide' in message:
-        return "Je suis là pour vous aider ! Posez-moi des questions sur cette leçon."
-    
-    if 'pdf' in message or 'document' in message:
-        if lesson.pdf:
-            return "Vous pouvez trouver le document PDF ci-dessus. Il contient des informations détaillées sur cette leçon."
-        return "Désolé, il n'y a pas de document PDF disponible pour cette leçon."
-    
-    if 'video' in message or 'vidéo' in message:
-        if lesson.video:
-            return "La vidéo de la leçon est disponible ci-dessus. Vous pouvez la regarder pour une meilleure compréhension."
-        return "Désolé, il n'y a pas de vidéo disponible pour cette leçon."
-    
-    if 'summary' in message or 'résumé' in message:
-        return f"Voici un résumé de la leçon '{lesson.title}': {lesson.description[:200]}..."
-    
-    # Default response
-    return "Je suis votre assistant virtuel. Je peux vous aider à comprendre cette leçon. Posez-moi des questions spécifiques sur le contenu."
-
-def add_lesson(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        video = request.FILES.get('video')
-        pdf = request.FILES.get('pdf')
-        order = request.POST.get('order', 0)
-        
-        try:
-            lesson = Lesson.objects.create(
-                course=course,
-                title=title,
-                description=description,
-                video=video,
-                pdf=pdf,
-                order=order
-            )
-            messages.success(request, "Lesson added successfully!")
-            return redirect('lessons_list', course_id=course.id)
-        except Exception as e:
-            messages.error(request, f"Could not add lesson: {str(e)}")
-    
-    context = {
-        'course': course,
-        'page_title': f'Add Lesson to {course.name}'
-    }
-    return render(request, 'main_app/add_lesson.html', context)
-=======
 @login_required
 def staff_iot_devices(request):
     """Vue pour lister et gérer les appareils IoT"""
@@ -691,4 +572,3 @@ def api_iot_device_data(request, device_id):
         'device_type': device.device_type,
         'device_name': device.name
     })
->>>>>>> develop
