@@ -842,8 +842,48 @@ def student_view_colab_notebook(request, notebook_id):
         }
     )
     
-    # Mettre à jour la date de dernier accès
-    progress.save()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'duplicate':
+            # Créer l'URL de duplication en ajoutant "copy" à l'URL du template
+            template_url = notebook.colab_url
+            if 'colab.research.google.com' in template_url:
+                if not template_url.endswith('/copy'):
+                    duplicate_url = template_url + '/copy'
+                else:
+                    duplicate_url = template_url
+                return redirect(duplicate_url)
+            else:
+                messages.error(request, "URL de notebook invalide")
+                
+        elif action == 'save_url':
+            personal_url = request.POST.get('personal_url')
+            if personal_url and 'colab.research.google.com' in personal_url:
+                progress.personal_colab_url = personal_url
+                progress.save()
+                messages.success(request, "URL de votre notebook personnel enregistrée avec succès")
+            else:
+                messages.error(request, "Veuillez fournir une URL Google Colab valide")
+                
+        elif action == 'complete':
+            progress.is_completed = True
+            progress.completed_date = timezone.now()
+            progress.save()
+            messages.success(request, "Exercice marqué comme terminé")
+            
+        elif action == 'update_progress':
+            new_progress = request.POST.get('progress', 0)
+            try:
+                new_progress = int(new_progress)
+                if 0 <= new_progress <= 100:
+                    progress.progress_percent = new_progress
+                    progress.save()
+                    messages.success(request, "Progression mise à jour")
+                else:
+                    messages.error(request, "La progression doit être entre 0 et 100")
+            except ValueError:
+                messages.error(request, "Valeur de progression invalide")
     
     context = {
         'notebook': notebook,

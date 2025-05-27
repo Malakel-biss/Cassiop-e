@@ -375,11 +375,14 @@ class ColabNotebookProgress(models.Model):
     
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     notebook = models.ForeignKey(GoogleColabNotebook, on_delete=models.CASCADE)
+    personal_colab_url = models.URLField(blank=True, help_text="URL personnelle du notebook de l'étudiant")
     is_completed = models.BooleanField(default=False)
     progress_percent = models.FloatField(default=0)
     last_accessed = models.DateTimeField(auto_now=True)
     completed_date = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True, help_text="Notes personnelles de l'étudiant sur ce notebook")
+    score = models.FloatField(null=True, blank=True, help_text="Note attribuée par le professeur")
+    feedback = models.TextField(blank=True, help_text="Commentaires du professeur")
     
     class Meta:
         unique_together = ('student', 'notebook')
@@ -449,6 +452,7 @@ class ForumReply(models.Model):
     def __str__(self):
         return f"Réponse de {self.created_by.first_name} sur {self.topic.title}"
 
+<<<<<<< HEAD
 class ChatMessage(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='chat_messages')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -461,3 +465,162 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f"{'Bot' if self.is_bot else self.user.email}: {self.message[:50]}"
+=======
+class IoTDevice(models.Model):
+    DEVICE_TYPES = (
+        ('temperature', 'Capteur de température'),
+        ('humidity', 'Capteur d\'humidité'),
+        ('motion', 'Capteur de mouvement'),
+        ('light', 'Capteur de luminosité'),
+        ('cpu', 'Utilisation CPU'),
+        ('memory', 'Utilisation mémoire'),
+        ('disk', 'Utilisation disque'),
+        ('network', 'Trafic réseau'),
+        ('other', 'Autre'),
+    )
+    
+    STATUS_CHOICES = (
+        ('active', 'Actif'),
+        ('inactive', 'Inactif'),
+        ('maintenance', 'En maintenance'),
+    )
+    
+    name = models.CharField(max_length=100)
+    device_id = models.CharField(max_length=50, unique=True)
+    device_type = models.CharField(max_length=20, choices=DEVICE_TYPES)
+    description = models.TextField(blank=True)
+    location = models.CharField(max_length=200, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='iot_devices')
+    created_by = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_data_received = models.DateTimeField(null=True, blank=True)
+    
+    # Nouveaux champs pour la pédagogie
+    learning_objective = models.TextField(
+        help_text="Objectif pédagogique de l'utilisation de cet appareil",
+        default="Analyse des données en temps réel pour comprendre les concepts fondamentaux"
+    )
+    expected_outcomes = models.TextField(
+        help_text="Résultats attendus de l'analyse des données",
+        default="Compréhension des patterns de données et capacité à interpréter les résultats"
+    )
+    difficulty_level = models.CharField(
+        max_length=20,
+        choices=(
+            ('beginner', 'Débutant'),
+            ('intermediate', 'Intermédiaire'),
+            ('advanced', 'Avancé'),
+        ),
+        default='intermediate'
+    )
+    
+    def __str__(self):
+        return f"{self.name} ({self.get_device_type_display()})"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+class IoTData(models.Model):
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='data_points')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    value = models.FloatField()
+    unit = models.CharField(max_length=20, default='')
+    metadata = models.JSONField(default=dict, help_text="Données additionnelles (ex: CPU%, RAM%, etc.)")
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['device', 'timestamp']),
+        ]
+
+class IoTAnalysis(models.Model):
+    ANALYSIS_TYPES = (
+        ('statistical', 'Analyse statistique'),
+        ('anomaly', 'Détection d\'anomalies'),
+        ('trend', 'Analyse de tendances'),
+        ('prediction', 'Prédiction'),
+        ('clustering', 'Clustering'),
+        ('correlation', 'Analyse de corrélation'),
+    )
+    
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='analyses')
+    analysis_type = models.CharField(max_length=20, choices=ANALYSIS_TYPES)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    parameters = models.JSONField(default=dict, help_text="Paramètres utilisés pour l'analyse")
+    results = models.JSONField(default=dict, help_text="Résultats de l'analyse")
+    created_by = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Nouveaux champs pour la pédagogie
+    learning_points = models.TextField(
+        help_text="Points clés à retenir de cette analyse",
+        default="Analyse des tendances et identification des patterns"
+    )
+    interpretation_guide = models.TextField(
+        help_text="Guide d'interprétation des résultats",
+        default="Guide d'interprétation des données et des résultats d'analyse"
+    )
+    suggested_exercises = models.TextField(
+        help_text="Exercices suggérés basés sur cette analyse",
+        default="Exercices pratiques pour approfondir la compréhension"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = "IoT Analyses"
+
+class IoTAssignment(models.Model):
+    device = models.ForeignKey(IoTDevice, on_delete=models.CASCADE, related_name='assignments')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    learning_objectives = models.TextField(help_text="Objectifs d'apprentissage de ce travail")
+    instructions = models.TextField(
+        help_text="Instructions détaillées pour l'étudiant",
+        default="Veuillez analyser les données fournies et rédiger un rapport."
+    )
+    due_date = models.DateTimeField()
+    points = models.IntegerField(default=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    
+    # Nouveaux champs pour la pédagogie
+    difficulty_level = models.CharField(max_length=20, choices=(
+        ('beginner', 'Débutant'),
+        ('intermediate', 'Intermédiaire'),
+        ('advanced', 'Avancé'),
+    ), default='intermediate')
+    required_skills = models.TextField(help_text="Compétences requises pour ce travail")
+    evaluation_criteria = models.TextField(
+        help_text="Critères d'évaluation",
+        default="Analyse de la qualité des résultats, clarté de l'interprétation, respect des consignes"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.device.name}"
+
+class IoTAssignmentSubmission(models.Model):
+    assignment = models.ForeignKey(IoTAssignment, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    analysis = models.TextField(help_text="Analyse des données réalisée par l'étudiant")
+    conclusion = models.TextField(help_text="Conclusion et interprétation des résultats")
+    files = models.FileField(upload_to='iot_submissions/', blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    score = models.FloatField(null=True, blank=True)
+    feedback = models.TextField(blank=True)
+    is_graded = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-submitted_at']
+        unique_together = ['assignment', 'student']
+
+    def __str__(self):
+        return f"{self.student.admin.get_full_name()} - {self.assignment.title}"
+>>>>>>> develop

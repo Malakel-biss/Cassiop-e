@@ -1,0 +1,163 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Travail IoT - {{ device.name }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Travail IoT - {{ device.name }}</h3>
+                        <div class="card-tools">
+                            <a href="{% url 'student_iot_device_detail' device.id %}" class="btn btn-default btn-sm">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Description du travail -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Description du travail</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5>{{ assignment.title }}</h5>
+                                        <p>{{ assignment.description|linebreaks }}</p>
+                                        <div class="mt-3">
+                                            <strong>Date limite :</strong> {{ assignment.due_date|date:"d/m/Y H:i" }}
+                                            <br>
+                                            <strong>Points :</strong> {{ assignment.points }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Zone de travail -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Votre travail</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if submission %}
+                                            <div class="alert alert-info">
+                                                <h5>Statut : 
+                                                    <span class="badge {% if submission.is_graded %}badge-success{% else %}badge-warning{% endif %}">
+                                                        {% if submission.is_graded %}
+                                                            Noté ({{ submission.score }}/{{ assignment.points }})
+                                                        {% else %}
+                                                            En attente de notation
+                                                        {% endif %}
+                                                    </span>
+                                                </h5>
+                                                <p><strong>Soumis le :</strong> {{ submission.submitted_at|date:"d/m/Y H:i" }}</p>
+                                                {% if submission.feedback %}
+                                                    <div class="mt-3">
+                                                        <h6>Feedback du professeur :</h6>
+                                                        <p>{{ submission.feedback|linebreaks }}</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
+                                        <form method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="analysis">Analyse des données</label>
+                                                <textarea name="analysis" id="analysis" class="form-control" rows="6" required
+                                                    {% if submission and submission.is_graded %}disabled{% endif %}
+                                                >{% if submission %}{{ submission.analysis }}{% endif %}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="conclusion">Conclusion</label>
+                                                <textarea name="conclusion" id="conclusion" class="form-control" rows="4" required
+                                                    {% if submission and submission.is_graded %}disabled{% endif %}
+                                                >{% if submission %}{{ submission.conclusion }}{% endif %}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="files">Fichiers joints (optionnel)</label>
+                                                <input type="file" name="files" id="files" class="form-control-file" multiple
+                                                    {% if submission and submission.is_graded %}disabled{% endif %}>
+                                                {% if submission and submission.files %}
+                                                    <small class="form-text text-muted">
+                                                        Fichiers déjà soumis : {{ submission.files|join:", " }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
+                                            {% if not submission or not submission.is_graded %}
+                                                <button type="submit" class="btn btn-primary">
+                                                    {% if submission %}Mettre à jour{% else %}Soumettre{% endif %}
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Données de l'appareil -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Données de l'appareil</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="assignmentDataChart" style="min-height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('assignmentDataChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ data_labels|safe }},
+            datasets: [{
+                label: 'Données',
+                data: {{ data_values|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
+});
+</script>
+{% endblock custom_js %} 

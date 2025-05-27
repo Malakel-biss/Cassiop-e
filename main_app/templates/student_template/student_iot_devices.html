@@ -1,0 +1,74 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Appareils IoT{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Appareils IoT</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Type</th>
+                                        <th>Matière</th>
+                                        <th>Statut</th>
+                                        <th>Dernière mise à jour</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for device in devices %}
+                                    <tr>
+                                        <td>{{ device.name }}</td>
+                                        <td>{{ device.get_device_type_display }}</td>
+                                        <td>{{ device.subject.name }}</td>
+                                        <td>
+                                            <span class="badge {% if device.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                                {{ device.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ device.last_updated|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'student_iot_device_detail' device.id %}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                            {% if device.has_assignment %}
+                                            <a href="{% url 'student_iot_assignment' device.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-tasks"></i> Travail
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">Aucun appareil IoT disponible</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 
