@@ -177,9 +177,27 @@ urlpatterns = [
     path('student/assignments/', student_views.student_assignments, name='student_assignments'),
     path('student/view_assignment/<int:assignment_id>/', student_views.student_view_assignment, name='student_view_assignment'),
     path('student/view_submission/<int:submission_id>/', student_views.student_view_submission, name='student_view_submission'),
+<<<<<<< HEAD
     path('student/courses/', views.courses_view, name='courses'),
     path('student/courses/<int:course_id>/lessons/', views.lessons_list_view, name='lessons_list'),
     path('student/courses/<int:course_id>/lessons/<int:lesson_id>/', views.lesson_detail_view, name='lesson_detail'),
     path('student/courses/<int:course_id>/lessons/<int:lesson_id>/chat/', views.chat_message, name='chat_message'),
     path('student/courses/<int:course_id>/add-lesson/', views.add_lesson, name='add_lesson'),
+=======
+
+    # URLs pour les appareils IoT (Staff)
+    path('staff/iot-devices/', views.staff_iot_devices, name='staff_iot_devices'),
+    path('staff/iot-devices/<int:device_id>/', views.staff_iot_device_detail, name='staff_iot_device_detail'),
+    path('staff/iot-devices/<int:device_id>/analysis/', views.staff_iot_analysis, name='staff_iot_analysis'),
+    path('staff/iot-devices/simulate-cpu/', views.simulate_cpu_temperature, name='simulate_cpu_temperature'),
+    path('staff/iot-devices/simulate-system/', views.simulate_system_sensor, name='simulate_system_sensor'),
+    
+    # URLs pour les appareils IoT (Students)
+    path('student/iot-devices/', views.student_iot_devices, name='student_iot_devices'),
+    path('student/iot-devices/<int:device_id>/', views.student_iot_device_detail, name='student_iot_device_detail'),
+    
+    # API endpoints pour les données IoT
+    path('api/iot-data/', views.api_iot_data, name='api_iot_data'),
+    path('api/iot-device/<int:device_id>/data/', views.api_iot_device_data, name='api_iot_device_data'),
+>>>>>>> develop
 ]
