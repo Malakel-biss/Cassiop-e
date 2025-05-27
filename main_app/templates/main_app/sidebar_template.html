@@ -355,6 +355,14 @@
                 </li>
 
                 <li class="nav-item">
+                    {% url 'staff_iot_devices' as staff_iot_devices %}
+                    <a href="{{staff_iot_devices}}" class="nav-link {% if 'staff_iot' in request.path %} active {% endif %}">
+                        <i class="fas fa-microchip"></i>
+                        <p>Appareils IoT</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     {% url 'staff_assignments' as staff_assignments %}
                     <a href="{{staff_assignments}}" class="nav-link {% if staff_assignments == request.path %} active {% endif %}">
                         <i class="fas fa-tasks"></i>
@@ -551,6 +559,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    {% url 'student_iot_devices' as student_iot_devices %}
+                    <a href="{{student_iot_devices}}" class="nav-link {% if 'student_iot' in request.path %} active {% endif %}">
+                        <i class="fas fa-microchip"></i>
+                        <p>Appareils IoT</p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     {% url 'student_assignments' as student_assignments %}
                     <a href="{{student_assignments}}" class="nav-link {% if student_assignments == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-tasks"></i>
@@ -663,6 +678,13 @@
                     <a href="{{student_colab_notebooks}}" class="nav-link {% if 'student_colab' in request.path %} active {% endif %}">
                         <i class="fas fa-laptop-code"></i>
                         <p>Google Colab</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    {% url 'student_iot_devices' as student_iot_devices %}
+                    <a href="{{student_iot_devices}}" class="nav-link {% if 'student_iot' in request.path %} active {% endif %}">
+                        <i class="fas fa-microchip"></i>
+                        <p>Appareils IoT</p>
                     </a>
                 </li>
                 <li class="nav-item">

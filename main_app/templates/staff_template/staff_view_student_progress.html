@@ -1,5 +1,6 @@
 {% extends 'staff_template/staff_base.html' %}
 {% load custom_filters %}
+{% load static %}
 
 {% block page_title %}
 {{ page_title }}
@@ -10,187 +11,172 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Progression des étudiants - {{ notebook.title }}</h3>
+                <h3 class="card-title">{{ notebook.title }}</h3>
                 <div class="float-right">
                     <a href="{% url 'staff_colab_notebooks' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour
                     </a>
                 </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body">
-                {% if messages %}
-                <div class="alert alert-info">
-                    {% for message in messages %}
-                    {{ message }}
-                    {% endfor %}
-                </div>
-                {% endif %}
-
+                <!-- Informations sur l'exercice -->
                 <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card card-primary">
-                            <div class="card-header">
-                                <h5 class="card-title">Informations sur l'exercice</h5>
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Titre:</strong> {{ notebook.title }}</p>
-                                <p><strong>Module:</strong> {{ notebook.subject.name }}</p>
-                                <p><strong>Description:</strong> {{ notebook.description|truncatechars:250 }}</p>
-                                <p><strong>Difficulté:</strong> 
-                                    <span class="badge badge-{% if notebook.difficulty == 'beginner' %}success{% elif notebook.difficulty == 'intermediate' %}warning{% else %}danger{% endif %}">
-                                        {{ notebook.get_difficulty_display }}
-                                    </span>
-                                </p>
-                                <p><strong>Temps estimé:</strong> {{ notebook.estimated_time }} minutes</p>
-                                <p><strong>Date de création:</strong> {{ notebook.created_at|date:"d/m/Y" }}</p>
-                                <div class="mt-3">
-                                    <a href="{{ notebook.colab_url }}" target="_blank" class="btn btn-info">
-                                        <i class="fab fa-google"></i> Voir le notebook
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-md-12">
+                        <h4>Informations sur l'exercice</h4>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Titre</th>
+                                <td>{{ notebook.title }}</td>
+                            </tr>
+                            <tr>
+                                <th>Module</th>
+                                <td>{{ notebook.subject.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Description</th>
+                                <td>{{ notebook.description }}</td>
+                            </tr>
+                            <tr>
+                                <th>Difficulté</th>
+                                <td>{{ notebook.get_difficulty_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>Temps estimé</th>
+                                <td>{{ notebook.estimated_time }} minutes</td>
+                            </tr>
+                            <tr>
+                                <th>Date de création</th>
+                                <td>{{ notebook.created_at|date:"d/m/Y" }}</td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card card-success">
-                            <div class="card-header">
-                                <h5 class="card-title">Statistiques globales</h5>
-                            </div>
-                            <div class="card-body">
-                                {% with total_students=student_progresses.keys|length %}
-                                {% with completed_count=0 started_count=0 not_started_count=0 %}
-                                {% for student, progress in student_progresses.items %}
-                                    {% if progress.is_completed %}
-                                        {% with completed_count=completed_count|add:1 %}{% endwith %}
-                                    {% elif progress.progress_percent > 0 %}
-                                        {% with started_count=started_count|add:1 %}{% endwith %}
-                                    {% else %}
-                                        {% with not_started_count=not_started_count|add:1 %}{% endwith %}
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                <div class="row">
-                                    <div class="col-md-4 text-center">
-                                        <div class="info-box bg-success">
-                                            <div class="info-box-content">
-                                                <span class="info-box-text">Complété</span>
-                                                <span class="info-box-number">{{ completed_count }}</span>
-                                                <div class="progress">
-                                                    <div class="progress-bar progress-width" data-width="{{ completed_count|default:0|divisibleby:total_students|multiply:100 }}"></div>
-                                                </div>
-                                                <span class="progress-description">
-                                                    {{ completed_count|default:0|divisibleby:total_students|multiply:100|floatformat:0 }}% des étudiants
-                                                </span>
-                                            </div>
+                </div>
+
+                <!-- Statistiques globales -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h4>Statistiques globales</h4>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-box bg-success">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Complété</span>
+                                        <span class="info-box-number">{{ stats.completed.count }}</span>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: {{ stats.completed.percent }}%"></div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <div class="info-box bg-warning">
-                                            <div class="info-box-content">
-                                                <span class="info-box-text">En cours</span>
-                                                <span class="info-box-number">{{ started_count }}</span>
-                                                <div class="progress">
-                                                    <div class="progress-bar progress-width" data-width="{{ started_count|default:0|divisibleby:total_students|multiply:100 }}"></div>
-                                                </div>
-                                                <span class="progress-description">
-                                                    {{ started_count|default:0|divisibleby:total_students|multiply:100|floatformat:0 }}% des étudiants
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 text-center">
-                                        <div class="info-box bg-danger">
-                                            <div class="info-box-content">
-                                                <span class="info-box-text">Non commencé</span>
-                                                <span class="info-box-number">{{ not_started_count }}</span>
-                                                <div class="progress">
-                                                    <div class="progress-bar progress-width" data-width="{{ not_started_count|default:0|divisibleby:total_students|multiply:100 }}"></div>
-                                                </div>
-                                                <span class="progress-description">
-                                                    {{ not_started_count|default:0|divisibleby:total_students|multiply:100|floatformat:0 }}% des étudiants
-                                                </span>
-                                            </div>
-                                        </div>
+                                        <span class="progress-description">
+                                            {{ stats.completed.percent }}% des étudiants
+                                        </span>
                                     </div>
                                 </div>
-                                {% endwith %}
-                                {% endwith %}
-                                
-                                <div class="mt-4">
-                                    <canvas id="progressChart" style="height: 250px; width: 100%;"></canvas>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box bg-warning">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">En cours</span>
+                                        <span class="info-box-number">{{ stats.in_progress.count }}</span>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: {{ stats.in_progress.percent }}%"></div>
+                                        </div>
+                                        <span class="progress-description">
+                                            {{ stats.in_progress.percent }}% des étudiants
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box bg-danger">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Non commencé</span>
+                                        <span class="info-box-number">{{ stats.not_started.count }}</span>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: {{ stats.not_started.percent }}%"></div>
+                                        </div>
+                                        <span class="progress-description">
+                                            {{ stats.not_started.percent }}% des étudiants
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header bg-primary">
-                        <h5 class="card-title">Détail de la progression par étudiant</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered table-striped" id="progressTable">
-                            <thead>
-                                <tr>
-                                    <th>Étudiant</th>
-                                    <th>Email</th>
-                                    <th>Progression</th>
-                                    <th>Statut</th>
-                                    <th>Dernier accès</th>
-                                    <th>Date de complétion</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for student, progress in student_progresses.items %}
-                                <tr>
-                                    <td>{{ student.admin.first_name }} {{ student.admin.last_name }}</td>
-                                    <td>{{ student.admin.email }}</td>
-                                    <td>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-{% if progress.is_completed %}success{% elif progress.progress_percent > 0 %}warning{% else %}danger{% endif %} progress-width" 
-                                                data-width="{{ progress.progress_percent }}">
+                <!-- Détail de la progression par étudiant -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Détail de la progression par étudiant</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Étudiant</th>
+                                        <th>Progression</th>
+                                        <th>Statut</th>
+                                        <th>Dernier accès</th>
+                                        <th>Notebook personnel</th>
+                                        <th>Note</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student, progress in student_progresses.items %}
+                                    <tr>
+                                        <td>{{ student.admin.last_name }}, {{ student.admin.first_name }}</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar {% if progress.is_completed %}bg-success{% else %}bg-warning{% endif %}"
+                                                    role="progressbar" style="width: {{ progress.progress_percent }}%">
+                                                    {{ progress.progress_percent }}%
+                                                </div>
                                             </div>
-                                        </div>
-                                        <small>{{ progress.progress_percent|floatformat:0 }}%</small>
-                                    </td>
-                                    <td>
-                                        {% if progress.is_completed %}
-                                        <span class="badge badge-success">Complété</span>
-                                        {% elif progress.progress_percent > 0 %}
-                                        <span class="badge badge-warning">En cours</span>
-                                        {% else %}
-                                        <span class="badge badge-danger">Non commencé</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if progress.last_accessed %}
-                                        {{ progress.last_accessed|date:"d/m/Y H:i" }}
-                                        {% else %}
-                                        -
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if progress.completed_date %}
-                                        {{ progress.completed_date|date:"d/m/Y H:i" }}
-                                        {% else %}
-                                        -
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if progress.notes %}
-                                        <button type="button" class="btn btn-sm btn-info view-notes" data-notes="{{ progress.notes }}" data-student="{{ student.admin.first_name }} {{ student.admin.last_name }}">
-                                            <i class="fas fa-eye"></i> Voir les notes
-                                        </button>
-                                        {% else %}
-                                        <span class="text-muted">Aucune note</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                        </td>
+                                        <td>
+                                            {% if progress.is_completed %}
+                                                <span class="badge badge-success">Complété</span>
+                                            {% elif progress.progress_percent > 0 %}
+                                                <span class="badge badge-warning">En cours</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Non commencé</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if progress.last_accessed %}
+                                                {{ progress.last_accessed|date:"d/m/Y H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if progress.personal_colab_url %}
+                                                <a href="{{ progress.personal_colab_url }}" target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-external-link-alt"></i> Voir le notebook
+                                                </a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if progress.score %}
+                                                {{ progress.score }}/20
+                                                {% if progress.feedback %}
+                                                    <i class="fas fa-comment text-info" data-toggle="tooltip" title="{{ progress.feedback }}"></i>
+                                                {% endif %}
+                                            {% else %}
+                                                Non noté
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-info" onclick="showGradeForm('{{ student.id }}', '{{ student.admin.first_name }}', '{{ student.admin.last_name }}', '{{ progress.personal_colab_url }}', '{{ progress.score|default_if_none:'' }}', '{{ progress.feedback|default:'' }}')" {% if not progress.personal_colab_url %}disabled{% endif %}>
+                                                <i class="fas fa-edit"></i> Noter
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,25 +184,61 @@
     </div>
 </div>
 
-<!-- Modal pour afficher les notes -->
-<div class="modal fade" id="notesModal" tabindex="-1" role="dialog" aria-labelledby="notesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<!-- Nouveau formulaire de notation (un seul pour toute la page) -->
+<div class="modal" id="gradeFormModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="notesModalLabel">Notes de l'étudiant</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <h5 class="modal-title">
+                    <i class="fas fa-edit"></i> Noter l'exercice - <span id="studentName"></span>
+                </h5>
+                <button type="button" class="close text-white" onclick="closeGradeForm()">
+                    <span>&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p id="studentName"></p>
-                <div class="card">
-                    <div class="card-body" id="notesContent">
+                <form id="gradeForm" onsubmit="submitGrade(event)">
+                    {% csrf_token %}
+                    <input type="hidden" id="gradeStudentId" name="student_id">
+                    
+                    <div class="form-group">
+                        <label>Notebook de l'étudiant</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="studentNotebookUrl" readonly>
+                            <div class="input-group-append">
+                                <a id="openNotebookBtn" href="#" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> Ouvrir
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+
+                    <div class="form-group">
+                        <label for="gradeScore">Note sur 20</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="gradeScore" name="score"
+                                min="0" max="20" step="0.5" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text">/20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gradeFeedback">Commentaires</label>
+                        <textarea class="form-control" id="gradeFeedback" name="feedback"
+                            rows="4" placeholder="Commentaires sur le travail..."></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeGradeForm()">
+                            <i class="fas fa-times"></i> Fermer
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -224,65 +246,93 @@
 {% endblock %}
 
 {% block custom_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    $(document).ready(function () {
-        // Appliquer les largeurs aux barres de progression
-        $('.progress-width').each(function() {
-            var width = $(this).data('width');
-            $(this).css('width', width + '%');
-        });
-        
-        $('#progressTable').DataTable({
-            responsive: true,
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/French.json"
-            }
-        });
-        
-        // Gestion du modal pour afficher les notes des étudiants
-        $('.view-notes').click(function() {
-            var notes = $(this).data('notes');
-            var student = $(this).data('student');
-            
-            $('#studentName').text('Notes de ' + student + ' :');
-            $('#notesContent').html('<p>' + notes.replace(/\n/g, '<br>') + '</p>');
-            $('#notesModal').modal('show');
-        });
-        
-        // Préparation des données pour le graphique
-        var ctx = document.getElementById('progressChart').getContext('2d');
-        var completedCount = {{ completed_count|default:0 }};
-        var startedCount = {{ started_count|default:0 }};
-        var notStartedCount = {{ not_started_count|default:0 }};
-        
-        var progressChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Complété', 'En cours', 'Non commencé'],
-                datasets: [{
-                    data: [completedCount, startedCount, notStartedCount],
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.8)',
-                        'rgba(255, 193, 7, 0.8)',
-                        'rgba(220, 53, 69, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(40, 167, 69, 1)',
-                        'rgba(255, 193, 7, 1)',
-                        'rgba(220, 53, 69, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    position: 'right'
-                }
-            }
-        });
+$(document).ready(function() {
+    // Activer les tooltips pour les commentaires
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Initialiser DataTables
+    $('.table').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+        },
+        "order": [[1, "desc"]]
     });
+
+    // Ajouter le token CSRF à toutes les requêtes AJAX
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", document.querySelector('[name=csrfmiddlewaretoken]').value);
+            }
+        }
+    });
+});
+
+let isSubmitting = false;
+
+function showGradeForm(studentId, firstName, lastName, notebookUrl, score, feedback) {
+    // Remplir les informations
+    document.getElementById('studentName').textContent = lastName + ', ' + firstName;
+    document.getElementById('gradeStudentId').value = studentId;
+    document.getElementById('studentNotebookUrl').value = notebookUrl;
+    document.getElementById('gradeScore').value = score;
+    document.getElementById('gradeFeedback').value = feedback;
+    document.getElementById('openNotebookBtn').href = notebookUrl;
+
+    // Afficher le modal
+    $('#gradeFormModal').modal({
+        backdrop: 'static',
+        keyboard: false,
+        show: true
+    });
+}
+
+function closeGradeForm() {
+    if (!isSubmitting) {
+        $('#gradeFormModal').modal('hide');
+    }
+}
+
+function submitGrade(event) {
+    event.preventDefault();
+    
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    const form = document.getElementById('gradeForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const closeBtn = form.querySelector('button[type="button"]');
+    
+    submitBtn.disabled = true;
+    closeBtn.disabled = true;
+
+    const formData = new FormData(form);
+    
+    $.ajax({
+        url: window.location.href,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la notation. Veuillez réessayer.');
+            submitBtn.disabled = false;
+            closeBtn.disabled = false;
+            isSubmitting = false;
+        }
+    });
+}
+
+// Empêcher la fermeture du modal pendant la soumission
+$('#gradeFormModal').on('hide.bs.modal', function(e) {
+    if (isSubmitting) {
+        e.preventDefault();
+    }
+});
 </script>
 {% endblock %} 

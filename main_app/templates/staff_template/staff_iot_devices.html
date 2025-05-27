@@ -1,0 +1,198 @@
+{% extends 'staff_template/staff_base.html' %}
+{% load static %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-microchip"></i> Gestion des appareils IoT
+                </h3>
+                <div class="float-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-plus"></i> Ajouter un capteur
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'simulate_system_sensor' %}?type=cpu">
+                                <i class="fas fa-microchip"></i> Capteur CPU
+                            </a>
+                            <a class="dropdown-item" href="{% url 'simulate_system_sensor' %}?type=memory">
+                                <i class="fas fa-memory"></i> Capteur Mémoire
+                            </a>
+                            <a class="dropdown-item" href="{% url 'simulate_system_sensor' %}?type=disk">
+                                <i class="fas fa-hdd"></i> Capteur Disque
+                            </a>
+                            <a class="dropdown-item" href="{% url 'simulate_system_sensor' %}?type=network">
+                                <i class="fas fa-network-wired"></i> Capteur Réseau
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button type="button" class="dropdown-item" data-toggle="modal" data-target="#addDeviceModal">
+                                <i class="fas fa-plus-circle"></i> Autre type d'appareil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>ID</th>
+                                <th>Matière</th>
+                                <th>Statut</th>
+                                <th>Dernière donnée</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in devices %}
+                            <tr>
+                                <td>{{ device.name }}</td>
+                                <td>{{ device.get_device_type_display }}</td>
+                                <td><code>{{ device.device_id }}</code></td>
+                                <td>{{ device.subject.name }}</td>
+                                <td>
+                                    <span class="badge badge-{% if device.status == 'active' %}success{% elif device.status == 'maintenance' %}warning{% else %}danger{% endif %}">
+                                        {{ device.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if device.last_data_received %}
+                                        {{ device.last_data_received|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'staff_iot_device_detail' device.id %}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-chart-line"></i> Données
+                                    </a>
+                                    <a href="{% url 'staff_iot_analysis' device.id %}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-brain"></i> Analyses
+                                    </a>
+                                    <button type="button" class="btn btn-warning btn-sm" data-device-id="{{ device.id }}" onclick="editDevice(this.dataset.deviceId)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <p class="text-muted">Aucun appareil IoT n'a été ajouté.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter un appareil -->
+<div class="modal fade" id="addDeviceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Ajouter un appareil IoT
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="addDeviceForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="deviceName">Nom de l'appareil</label>
+                        <input type="text" class="form-control" id="deviceName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceType">Type d'appareil</label>
+                        <select class="form-control" id="deviceType" name="device_type" required>
+                            <option value="">Sélectionner un type...</option>
+                            <option value="temperature">Capteur de température</option>
+                            <option value="humidity">Capteur d'humidité</option>
+                            <option value="motion">Capteur de mouvement</option>
+                            <option value="light">Capteur de luminosité</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceSubject">Matière</label>
+                        <select class="form-control" id="deviceSubject" name="subject" required>
+                            <option value="">Sélectionner une matière...</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceLocation">Emplacement (optionnel)</label>
+                        <input type="text" class="form-control" id="deviceLocation" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceDescription">Description (optionnel)</label>
+                        <textarea class="form-control" id="deviceDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+<script>
+$(document).ready(function() {
+    // Initialiser DataTables
+    $('.table').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+        }
+    });
+    
+    // Gérer la soumission du formulaire d'ajout
+    $('#addDeviceForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $.ajax({
+            url: '{% url "staff_iot_devices" %}',
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Erreur lors de l\'ajout de l\'appareil');
+                }
+            },
+            error: function() {
+                alert('Erreur lors de l\'ajout de l\'appareil');
+            }
+        });
+    });
+});
+
+function editDevice(deviceId) {
+    // TODO: Implémenter l'édition d'un appareil
+    alert('Fonctionnalité à implémenter pour l\'appareil ' + deviceId);
+}
+</script>
+{% endblock %} 

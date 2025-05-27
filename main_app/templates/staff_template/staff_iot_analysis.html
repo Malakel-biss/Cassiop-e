@@ -1,0 +1,179 @@
+{% extends 'staff_template/staff_base.html' %}
+{% load static %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-brain"></i> Analyses - {{ device.name }}
+                </h3>
+                <div class="float-right">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newAnalysisModal">
+                        <i class="fas fa-plus"></i> Nouvelle analyse
+                    </button>
+                    <a href="{% url 'staff_iot_device_detail' device.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Liste des analyses -->
+                <div class="row">
+                    {% for analysis in analyses %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">
+                                    {{ analysis.title }}
+                                    <span class="badge badge-info float-right">{{ analysis.get_analysis_type_display }}</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if analysis.description %}
+                                <p class="card-text">{{ analysis.description }}</p>
+                                {% endif %}
+                                
+                                <div class="analysis-results">
+                                    {% if analysis.analysis_type == 'statistical' %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-box bg-info">
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Moyenne</span>
+                                                        <span class="info-box-number">{{ analysis.results.mean|floatformat:2 }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-box bg-warning">
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Écart-type</span>
+                                                        <span class="info-box-number">{{ analysis.results.std|floatformat:2 }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% elif analysis.analysis_type == 'anomaly' %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-box bg-danger">
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Anomalies détectées</span>
+                                                        <span class="info-box-number">{{ analysis.results.anomalies_count }}</span>
+                                                        <span class="info-box-text">({{ analysis.results.anomaly_percentage|floatformat:1 }}%)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-box bg-success">
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Données normales</span>
+                                                        <span class="info-box-number">{{ analysis.results.normal_count }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Créée le {{ analysis.created_at|date:"d/m/Y H:i" }}
+                                        par {{ analysis.created_by.admin.get_full_name }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Aucune analyse n'a été effectuée sur cet appareil.
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour nouvelle analyse -->
+<div class="modal fade" id="newAnalysisModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Nouvelle analyse
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="newAnalysisForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="analysisTitle">Titre de l'analyse</label>
+                        <input type="text" class="form-control" id="analysisTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="analysisType">Type d'analyse</label>
+                        <select class="form-control" id="analysisType" name="analysis_type" required>
+                            <option value="">Sélectionner un type...</option>
+                            <option value="statistical">Analyse statistique</option>
+                            <option value="anomaly">Détection d'anomalies</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="analysisDescription">Description (optionnel)</label>
+                        <textarea class="form-control" id="analysisDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Lancer l'analyse</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+$(document).ready(function() {
+    // Gérer la soumission du formulaire d'analyse
+    $('#newAnalysisForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Analyse en cours...');
+        
+        $.ajax({
+            url: '{% url "staff_iot_analysis" device.id %}',
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert('Erreur lors de l\'analyse');
+                    submitBtn.prop('disabled', false).html('Lancer l\'analyse');
+                }
+            },
+            error: function() {
+                alert('Erreur lors de l\'analyse');
+                submitBtn.prop('disabled', false).html('Lancer l\'analyse');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
