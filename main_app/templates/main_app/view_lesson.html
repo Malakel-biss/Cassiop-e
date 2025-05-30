@@ -1,0 +1,32 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Détails de la Leçon{% endblock page_title %}
+
+{% block content %}
+  <h1>{{ lecon.name }}</h1>
+
+  <div class="lesson-content">
+    <p><strong>Description:</strong> {{ lecon.description }}</p>
+
+    <!-- Check if there's a PDF associated with the lesson -->
+    {% if lecon.pdf %}
+      <h3>PDF associé:</h3>
+      <a href="{{ lecon.pdf.url }}" target="_blank">Télécharger le PDF</a>
+    {% else %}
+      <p>Aucun PDF disponible pour cette leçon.</p>
+    {% endif %}
+
+    <!-- Check if there's a video associated with the lesson -->
+    {% if lecon.video %}
+      <h3>Vidéo associée:</h3>
+      <video width="600" controls>
+        <source src="{{ lecon.video.url }}" type="video/mp4">
+        Votre navigateur ne supporte pas la lecture vidéo.
+      </video>
+    {% else %}
+      <p>Aucune vidéo disponible pour cette leçon.</p>
+    {% endif %}
+
+  </div>
+
+{% endblock %}

@@ -18,6 +18,16 @@ from django.urls import path
 from main_app.EditResultView import EditResultView
 
 from . import hod_views, staff_views, student_views, views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ModuleViewSet, LessonViewSet, add_module, add_lesson, list_lessons, list_modules, list_lecons_by_module
+from . import views  # Import views.py
+
+router = DefaultRouter()
+router.register(r'modules', ModuleViewSet)
+router.register(r'lessons', LessonViewSet)
+
+
 
 urlpatterns = [
     path("", views.login_page, name='login_page'),
@@ -192,4 +202,21 @@ urlpatterns = [
     # API endpoints pour les données IoT
     path('api/iot-data/', views.api_iot_data, name='api_iot_data'),
     path('api/iot-device/<int:device_id>/data/', views.api_iot_device_data, name='api_iot_device_data'),
+
+
+
+    path("ajouter-module/", views.add_module, name="add_module"),
+    path("ajouter-lecon/", views.add_lesson, name="add_lesson"),
+
+    path('api/', include(router.urls)),
+     path('lecons/', list_lessons, name='list_lessons'),
+    path('ajouter-lecon/', add_lesson, name='add_lesson'),
+    path('ajouter-module/', add_module, name='add_module'),
+    path('modules/', views.list_modules, name='list_modules'),
+    path('modules/<int:module_id>/lessons/', views.list_lecons_by_module, name='list_lecons_by_module'),
+    # other urls
+    path('lecons/<int:lesson_id>/', views.view_lesson, name='view_lesson'),
 ]
+
+
+

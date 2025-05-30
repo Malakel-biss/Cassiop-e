@@ -20,9 +20,88 @@ from django.db.models import Avg, Max, Min, Count
 from django.db.models.functions import Trunc
 
 from .EmailBackend import EmailBackend
-from .models import Attendance, Session, Subject, IoTDevice, IoTData, IoTAnalysis, Staff, Student
+from .models import Attendance, Session, Subject, IoTDevice, IoTData, IoTAnalysis, Staff, Student, Module, Lesson,Course  
 
 # Create your views here.
+from rest_framework import viewsets
+from .serializers import ModuleSerializer, LessonSerializer
+
+class ModuleViewSet(viewsets.ModelViewSet):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+
+class LessonViewSet(viewsets.ModelViewSet):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Module, Lesson
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def add_module(request):
+    courses = Course.objects.all()
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        course_id = request.POST.get("course")
+
+        course = Course.objects.get(id=course_id)
+        Module.objects.create(name=name, description=description, course=course)
+        messages.success(request, "Module ajouté avec succès")
+        return redirect('add_module')  # <- make sure this name matches your urls.py
+
+    return render(request, 'main_app/add_module.html', {"courses": courses})
+
+from django.shortcuts import render
+from .models import Lesson  # or Lecon if that's the model name
+
+def list_lessons(request):
+    lessons = Lesson.objects.select_related('module').all()
+    return render(request, 'main_app/list_lessons.html', {'lessons': lessons})
+
+@login_required
+def list_modules(request):
+    modules = Module.objects.select_related('course').all()
+    return render(request, 'main_app/list_modules.html', {'modules': modules})
+
+def list_lecons_by_module(request, module_id):
+    module = Module.objects.get(id=module_id)  # Get the module by ID
+    lecons = Lesson.objects.filter(module=module)  # Fetch lessons related to that module
+    return render(request, 'main_app/list_lecons_by_module.html', {'module': module, 'lecons': lecons})
+
+
+
+def view_lesson(request, lesson_id):
+    # Fetch the lesson object by its ID
+    lecon = get_object_or_404(Lesson, id=lesson_id)
+
+    # Render the lesson detail page
+    return render(request, 'main_app/view_lesson.html', {'lecon': lecon})
+  
+@login_required
+def add_lesson(request):
+    if request.method == "POST":
+        module_id = request.POST.get("module")
+        name = request.POST.get("name")
+        pdf = request.FILES.get("pdf")
+        video = request.FILES.get("video")
+
+        try:
+            module = Module.objects.get(id=module_id)
+            Lesson.objects.create(module=module, name=name, pdf=pdf, video=video)
+            messages.success(request, "Leçon ajoutée avec succès.")
+        except Module.DoesNotExist:
+            messages.error(request, "Module invalide.")
+
+        return redirect("add_lesson")  # Replace with your actual URL name
+
+    modules = Module.objects.all()
+    return render(request, "main_app/add_lesson.html", {
+        "modules": modules
+    })
 
 
 def login_page(request):

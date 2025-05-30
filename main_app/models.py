@@ -64,12 +64,12 @@ class CustomUser(AbstractUser):
 class Admin(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
-
-
 class Course(models.Model):
     name = models.CharField(max_length=120)
+    description = models.TextField(blank=True, null=True)  # ✅ Add this
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.name
@@ -101,6 +101,27 @@ class Subject(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Module(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE,null=True)  # optional if tied to Course
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Lesson(models.Model):
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="lessons")
+    name = models.CharField(max_length=200)
+    pdf = models.FileField(upload_to="lessons/pdfs/", blank=True, null=True)
+    video = models.FileField(upload_to="lessons/videos/", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.module.name})"
 
 
 class Attendance(models.Model):
@@ -390,7 +411,7 @@ class Message(models.Model):
 
 class ForumCategory(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     

@@ -161,6 +161,41 @@
                         </p>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    {% url 'list_modules' as list_modules %}
+                    <a href="{{ list_modules }}" class="nav-link {% if list_modules == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>Liste des Modules</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'add_module' as add_module %}
+                    <a href="{{ add_module }}" class="nav-link {% if add_module == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-plus-circle"></i>
+                        <p>Ajouter un Module</p>
+                    </a>
+                </li>
+
+
+
+                <li class="nav-item">
+                    {% url 'list_lessons' as list_lessons %}
+                    <a href="{{ list_lessons }}" class="nav-link {% if list_lessons == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>Liste des Leçons</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'add_lesson' as add_lesson %}
+                    <a href="{{ add_lesson }}" class="nav-link {% if add_lesson == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-plus-circle"></i>
+                        <p>Ajouter une Leçon</p>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     {% url 'add_course' as add_course %}
                     <a href="{{add_course}}" class="nav-link  {% if add_course == request.path %} active {% endif %}">
@@ -353,6 +388,22 @@
                         <p>Google Colab</p>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    {% url 'list_modules' as list_modules %}
+                    <a href="{{ list_modules }}" class="nav-link {% if list_modules == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>Liste des Modules</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'add_module' as add_module %}
+                    <a href="{{ add_module }}" class="nav-link {% if add_module == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-plus-circle"></i>
+                        <p>Ajouter un Module</p>
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     {% url 'staff_iot_devices' as staff_iot_devices %}
@@ -489,6 +540,23 @@
                         </p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    {% url 'list_modules' as list_modules %}
+                    <a href="{{ list_modules }}" class="nav-link {% if list_modules == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>Liste des Modules</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    {% url 'list_lessons' as list_lessons %}
+                    <a href="{{ list_lessons }}" class="nav-link {% if list_lessons == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>Liste des Leçons</p>
+                    </a>
+                </li>
+
+
 
                 <li class="nav-item">
                     {% url 'student_view_attendance' as student_view_attendance %}
