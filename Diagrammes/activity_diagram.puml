@@ -1,0 +1,75 @@
+@startuml IoT Data Analysis Process
+
+' Style du diagramme
+skinparam activity {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+start
+
+:Professeur connecté;
+
+if (Capteur IoT disponible?) then (oui)
+    :Sélectionner le capteur;
+    :Configurer les paramètres d'analyse;
+    
+    fork
+        :Collecter les données en temps réel;
+    fork again
+        :Vérifier l'état du capteur;
+    end fork
+    
+    :Prétraiter les données;
+    
+    switch (Type d'analyse)
+    case (Analyse statistique)
+        :Calculer les statistiques descriptives;
+        :Générer les graphiques;
+    case (Détection d'anomalies)
+        :Appliquer l'algorithme de détection;
+        :Identifier les points aberrants;
+    case (Analyse de tendances)
+        :Calculer les tendances;
+        :Prédire les évolutions futures;
+    endswitch
+    
+    :Interpréter les résultats;
+    :Générer le rapport d'analyse;
+    
+    fork
+        :Sauvegarder les résultats;
+    fork again
+        :Mettre à jour le dashboard;
+    end fork
+    
+    :Partager l'analyse avec les étudiants;
+    
+else (non)
+    :Afficher message d'erreur;
+    stop
+endif
+
+:Étudiant accède à l'analyse;
+
+fork
+    :Visualiser les graphiques;
+fork again
+    :Consulter les interprétations;
+fork again
+    :Télécharger les données brutes;
+end fork
+
+:Compléter les exercices associés;
+
+if (Exercices complétés?) then (oui)
+    :Soumettre les réponses;
+    :Recevoir le feedback;
+else (non)
+    :Continuer le travail;
+endif
+
+stop
+
+@enduml 
