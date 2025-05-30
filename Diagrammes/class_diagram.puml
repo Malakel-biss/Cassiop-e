@@ -1,0 +1,174 @@
+@startuml Cassiop-e Database Schema
+
+' Style du diagramme
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Définition des classes principales
+abstract class CustomUser {
+    +email: EmailField
+    +user_type: CharField
+    +gender: CharField
+    +profile_pic: ImageField
+    +address: TextField
+    +fcm_token: TextField
+    +created_at: DateTimeField
+    +updated_at: DateTimeField
+}
+
+class Admin {
+    +admin: OneToOneField(CustomUser)
+}
+
+class Staff {
+    +course: ForeignKey(Course)
+    +admin: OneToOneField(CustomUser)
+}
+
+class Student {
+    +admin: OneToOneField(CustomUser)
+    +course: ForeignKey(Course)
+    +session: ForeignKey(Session)
+}
+
+class Course {
+    +name: CharField
+    +created_at: DateTimeField
+    +updated_at: DateTimeField
+}
+
+class Subject {
+    +name: CharField
+    +staff: ForeignKey(Staff)
+    +course: ForeignKey(Course)
+    +created_at: DateTimeField
+    +updated_at: DateTimeField
+}
+
+class Session {
+    +start_year: DateField
+    +end_year: DateField
+}
+
+' Modèles d'évaluation et de progression
+class Assignment {
+    +title: CharField
+    +description: TextField
+    +subject: ForeignKey(Subject)
+    +due_date: DateTimeField
+    +assignment_type: CharField
+    +quiz_type: CharField
+    +total_points: IntegerField
+}
+
+class Question {
+    +assignment: ForeignKey(Assignment)
+    +text: TextField
+    +points: IntegerField
+    +order: IntegerField
+}
+
+class Choice {
+    +question: ForeignKey(Question)
+    +text: CharField
+    +is_correct: BooleanField
+}
+
+class AssignmentSubmission {
+    +assignment: ForeignKey(Assignment)
+    +student: ForeignKey(Student)
+    +submitted_at: DateTimeField
+    +score: FloatField
+    +feedback: TextField
+    +is_late: BooleanField
+}
+
+' Modèles IoT
+class IoTDevice {
+    +name: CharField
+    +device_id: CharField
+    +device_type: CharField
+    +description: TextField
+    +status: CharField
+    +subject: ForeignKey(Subject)
+    +learning_objective: TextField
+    +expected_outcomes: TextField
+    +difficulty_level: CharField
+}
+
+class IoTData {
+    +device: ForeignKey(IoTDevice)
+    +timestamp: DateTimeField
+    +value: FloatField
+    +unit: CharField
+    +metadata: JSONField
+}
+
+class IoTAnalysis {
+    +device: ForeignKey(IoTDevice)
+    +analysis_type: CharField
+    +title: CharField
+    +description: TextField
+    +parameters: JSONField
+    +results: JSONField
+    +learning_points: TextField
+}
+
+' Modèles de communication
+class Message {
+    +sender: ForeignKey(CustomUser)
+    +receiver: ForeignKey(CustomUser)
+    +subject: CharField
+    +content: TextField
+    +is_read: BooleanField
+}
+
+class ForumCategory {
+    +name: CharField
+    +description: TextField
+    +course: ForeignKey(Course)
+}
+
+class ForumTopic {
+    +title: CharField
+    +content: TextField
+    +category: ForeignKey(ForumCategory)
+    +created_by: ForeignKey(CustomUser)
+    +is_pinned: BooleanField
+    +is_closed: BooleanField
+}
+
+class ForumReply {
+    +topic: ForeignKey(ForumTopic)
+    +content: TextField
+    +created_by: ForeignKey(CustomUser)
+    +is_solution: BooleanField
+}
+
+' Relations
+CustomUser <|-- Admin
+CustomUser <|-- Staff
+CustomUser <|-- Student
+
+Course "1" -- "*" Subject
+Course "1" -- "*" Staff
+Course "1" -- "*" Student
+
+Subject "1" -- "*" IoTDevice
+Subject "1" -- "*" Assignment
+
+Assignment "1" -- "*" Question
+Question "1" -- "*" Choice
+Assignment "1" -- "*" AssignmentSubmission
+
+IoTDevice "1" -- "*" IoTData
+IoTDevice "1" -- "*" IoTAnalysis
+
+ForumCategory "1" -- "*" ForumTopic
+ForumTopic "1" -- "*" ForumReply
+
+@enduml 

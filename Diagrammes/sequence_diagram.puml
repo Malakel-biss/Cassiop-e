@@ -1,0 +1,64 @@
+@startuml Assignment Submission and Evaluation
+
+' Style du diagramme
+skinparam sequence {
+    ArrowColor Black
+    LifeLineBorderColor Black
+    ParticipantBorderColor Black
+    ParticipantBackgroundColor White
+}
+
+actor Student
+participant "Interface Web" as UI
+participant "Vue Django" as View
+participant "Modèle Assignment" as Assignment
+participant "Modèle Submission" as Submission
+participant "Modèle Question" as Question
+participant "Modèle Choice" as Choice
+actor Staff
+
+' Création du devoir par le professeur
+Staff -> UI: Créer un nouveau devoir
+UI -> View: POST /assignment/create
+View -> Assignment: Créer assignment
+Assignment --> View: Confirmation
+View --> UI: Redirection vers la liste
+UI --> Staff: Affichage du devoir créé
+
+' Soumission par l'étudiant
+Student -> UI: Accéder au devoir
+UI -> View: GET /assignment/<id>
+View -> Assignment: Récupérer les détails
+Assignment --> View: Détails du devoir
+View --> UI: Afficher le formulaire
+Student -> UI: Remplir et soumettre
+UI -> View: POST /assignment/submit
+View -> Submission: Créer submission
+View -> Question: Récupérer les questions
+Question -> Choice: Vérifier les réponses
+Choice --> Question: Résultats
+Question --> View: Score calculé
+View -> Submission: Mettre à jour le score
+Submission --> View: Confirmation
+View --> UI: Redirection
+UI --> Student: Confirmation de soumission
+
+' Évaluation par le professeur
+Staff -> UI: Accéder aux soumissions
+UI -> View: GET /assignment/submissions
+View -> Submission: Lister les soumissions
+Submission --> View: Liste des soumissions
+View --> UI: Afficher les soumissions
+Staff -> UI: Évaluer une soumission
+UI -> View: POST /submission/grade
+View -> Submission: Mettre à jour la note
+View -> Submission: Ajouter le feedback
+Submission --> View: Confirmation
+View --> UI: Redirection
+UI --> Staff: Confirmation d'évaluation
+
+' Notification à l'étudiant
+View -> UI: Envoyer notification
+UI --> Student: Notification de note
+
+@enduml 

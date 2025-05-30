@@ -1,0 +1,83 @@
+@startuml Cassiop-e Use Cases
+
+' Style du diagramme
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' Acteurs
+actor "Administrateur" as Admin
+actor "Professeur" as Staff
+actor "Étudiant" as Student
+
+' Cas d'utilisation pour l'Administrateur
+rectangle "Gestion Administrative" {
+    usecase "Gérer les utilisateurs" as UC1
+    usecase "Gérer les cours" as UC2
+    usecase "Gérer les sessions" as UC3
+    usecase "Gérer les matières" as UC4
+    usecase "Voir les statistiques" as UC5
+    usecase "Gérer les permissions" as UC6
+}
+
+' Cas d'utilisation pour le Professeur
+rectangle "Gestion Pédagogique" {
+    usecase "Créer des devoirs" as UC7
+    usecase "Évaluer les devoirs" as UC8
+    usecase "Gérer les capteurs IoT" as UC9
+    usecase "Analyser les données IoT" as UC10
+    usecase "Créer des notebooks Colab" as UC11
+    usecase "Gérer le forum" as UC12
+    usecase "Envoyer des messages" as UC13
+    usecase "Voir la progression des étudiants" as UC14
+}
+
+' Cas d'utilisation pour l'Étudiant
+rectangle "Apprentissage" {
+    usecase "Consulter les cours" as UC15
+    usecase "Soumettre des devoirs" as UC16
+    usecase "Participer au forum" as UC17
+    usecase "Utiliser les capteurs IoT" as UC18
+    usecase "Travailler sur les notebooks Colab" as UC19
+    usecase "Voir sa progression" as UC20
+    usecase "Envoyer des messages" as UC21
+}
+
+' Relations pour l'Administrateur
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+
+' Relations pour le Professeur
+Staff --> UC7
+Staff --> UC8
+Staff --> UC9
+Staff --> UC10
+Staff --> UC11
+Staff --> UC12
+Staff --> UC13
+Staff --> UC14
+
+' Relations pour l'Étudiant
+Student --> UC15
+Student --> UC16
+Student --> UC17
+Student --> UC18
+Student --> UC19
+Student --> UC20
+Student --> UC21
+
+' Relations entre cas d'utilisation
+UC7 ..> UC8 : <<include>>
+UC9 ..> UC10 : <<include>>
+UC12 ..> UC17 : <<extend>>
+UC13 ..> UC21 : <<extend>>
+UC14 ..> UC20 : <<extend>>
+
+@enduml 
