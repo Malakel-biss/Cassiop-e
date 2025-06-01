@@ -1,6 +1,6 @@
 # 🎓 Cassiopée - Application SAAS d'enseignement et de prototypage basée sur l'IA générative
 
-![Cassiop-e Logo](image/logo nexed.png)
+![Cassiop-e Logo](image/logonexed.png)
 
 ## 📋 Table des Matières
 - [À Propos](#-à-propos)
