@@ -19,3 +19,4 @@ openai==1.82.1
 gTTS==2.3.2
 torch
 ctranslate2
+djangorestframework
