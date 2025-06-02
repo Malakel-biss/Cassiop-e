@@ -1,0 +1,149 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{ device.name }} - Détails{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ device.name }}</h3>
+                        <div class="card-tools">
+                            <a href="{% url 'student_iot_devices' %}" class="btn btn-default btn-sm">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Informations de l'appareil -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h4>Informations de l'appareil</h4>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>Type</th>
+                                        <td>{{ device.get_device_type_display }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Matière</th>
+                                        <td>{{ device.subject.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Statut</th>
+                                        <td>
+                                            <span class="badge {% if device.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                                {{ device.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dernière mise à jour</th>
+                                        <td>{{ device.last_updated|date:"d/m/Y H:i" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Description</h4>
+                                <p>{{ device.description|linebreaks }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Graphique des données -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Données en temps réel</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="dataChart" style="min-height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analyses disponibles -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Analyses disponibles</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            {% for analysis in analyses %}
+                                            <div class="col-md-4 mb-3">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">{{ analysis.title }}</h5>
+                                                        <p class="card-text">{{ analysis.description }}</p>
+                                                        <a href="{% url 'student_iot_analysis' device.id analysis.id %}" class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-chart-line"></i> Voir l'analyse
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% empty %}
+                                            <div class="col-12">
+                                                <p class="text-center">Aucune analyse disponible pour cet appareil.</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('dataChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Données',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Fonction pour mettre à jour les données
+    function updateData() {
+        fetch(`/api/iot-device/${deviceId}/data/`)
+            .then(response => response.json())
+            .then(data => {
+                chart.data.labels = data.labels;
+                chart.data.datasets[0].data = data.values;
+                chart.update();
+            });
+    }
+
+    // Mise à jour initiale et toutes les 5 secondes
+    updateData();
+    setInterval(updateData, 5000);
+});
+</script>
+{% endblock custom_js %} 

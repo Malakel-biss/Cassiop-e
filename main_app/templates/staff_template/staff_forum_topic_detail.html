@@ -1,0 +1,147 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            {% if topic.is_pinned %}<i class="fas fa-thumbtack mr-1"></i>{% endif %}
+                            {{ topic.title }}
+                        </h3>
+                        <div class="card-tools">
+                            <a href="{% url 'staff_forum_topics' topic.category.id %}" class="btn btn-default btn-sm">
+                                <i class="fas fa-arrow-left"></i> Retour aux sujets
+                            </a>
+                            {% if topic.created_by == request.user %}
+                            <button class="btn btn-sm btn-warning toggle-pin" data-topic-id="{{ topic.id }}" data-is-pinned="{{ topic.is_pinned|lower }}">
+                                {% if topic.is_pinned %}
+                                <i class="fas fa-thumbtack"></i> Désépingler
+                                {% else %}
+                                <i class="fas fa-thumbtack"></i> Épingler
+                                {% endif %}
+                            </button>
+                            <button class="btn btn-sm btn-danger toggle-close" data-topic-id="{{ topic.id }}" data-is-closed="{{ topic.is_closed|lower }}">
+                                {% if topic.is_closed %}
+                                <i class="fas fa-lock-open"></i> Rouvrir
+                                {% else %}
+                                <i class="fas fa-lock"></i> Fermer
+                                {% endif %}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="post topic-post">
+                            <div class="user-block">
+                                {% if topic.created_by.profile_pic %}
+                                <img class="img-circle img-bordered-sm" src="{{ topic.created_by.profile_pic.url }}" alt="User Image">
+                                {% else %}
+                                <img class="img-circle img-bordered-sm" src="{% static 'dist/img/default-user.png' %}" alt="User Image">
+                                {% endif %}
+                                <span class="username">
+                                    {{ topic.created_by.first_name }} {{ topic.created_by.last_name }}
+                                    {% if topic.created_by.user_type == '2' %}
+                                    <span class="badge badge-primary">Professeur</span>
+                                    {% endif %}
+                                </span>
+                                <span class="description">Posté le {{ topic.created_at|date:"d/m/Y à H:i" }}</span>
+                            </div>
+                            <div class="post-content mt-3">
+                                {{ topic.content|linebreaks }}
+                            </div>
+                        </div>
+                        
+                        <hr class="mt-4 mb-4">
+                        
+                        <h5>
+                            <i class="fas fa-comments mr-1"></i> Réponses ({{ replies.count }})
+                        </h5>
+                        
+                        {% if replies %}
+                        <div class="replies mt-3">
+                            {% for reply in replies %}
+                            <div class="post reply-post {% if reply.is_solution %}bg-light border border-success{% endif %} mb-3">
+                                <div class="user-block">
+                                    {% if reply.created_by.profile_pic %}
+                                    <img class="img-circle img-bordered-sm" src="{{ reply.created_by.profile_pic.url }}" alt="User Image">
+                                    {% else %}
+                                    <img class="img-circle img-bordered-sm" src="{% static 'dist/img/default-user.png' %}" alt="User Image">
+                                    {% endif %}
+                                    <span class="username">
+                                        {{ reply.created_by.first_name }} {{ reply.created_by.last_name }}
+                                        {% if reply.created_by.user_type == '2' %}
+                                        <span class="badge badge-primary">Professeur</span>
+                                        {% endif %}
+                                        {% if reply.is_solution %}
+                                        <span class="badge badge-success">Solution</span>
+                                        {% endif %}
+                                        
+                                        <!-- Options pour les professeurs -->
+                                        {% if is_staff and not reply.is_solution %}
+                                        <button class="btn btn-sm btn-success mark-solution float-right" data-reply-id="{{ reply.id }}">
+                                            <i class="fas fa-check"></i> Marquer comme solution
+                                        </button>
+                                        {% endif %}
+                                    </span>
+                                    <span class="description">Répondu le {{ reply.created_at|date:"d/m/Y à H:i" }}</span>
+                                </div>
+                                <div class="post-content mt-2">
+                                    {{ reply.content|linebreaks }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="icon fas fa-info"></i> Aucune réponse pour le moment.
+                        </div>
+                        {% endif %}
+                        
+                        {% if not topic.is_closed %}
+                        <div class="reply-form mt-4">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">Ajouter une réponse</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="content">Votre réponse</label>
+                                            <textarea name="content" id="content" class="form-control" rows="5" required></textarea>
+                                        </div>
+                                        
+                                        {% if is_staff %}
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" name="mark_solution" id="mark_solution">
+                                            <label class="form-check-label" for="mark_solution">
+                                                Marquer comme solution (fermera le sujet)
+                                            </label>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane"></i> Soumettre
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning mt-4">
+                            <i class="icon fas fa-exclamation-triangle"></i> Ce sujet est fermé. Vous ne pouvez plus y répondre.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

@@ -1,0 +1,86 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Ajouter un Support de Cours{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Ajouter un Support de Cours</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Module</label>
+                                <select name="subject" class="form-control" required>
+                                    <option value="">Sélectionnez un module</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Titre</label>
+                                <input type="text" name="title" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea name="description" class="form-control" rows="4" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Type de Support</label>
+                                <select name="material_type" class="form-control" required>
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="pdf">Document PDF</option>
+                                    <option value="document">Document</option>
+                                    <option value="video">Vidéo</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fichier</label>
+                                <input type="file" name="file" class="form-control" required>
+                                <small class="form-text text-muted">Formats acceptés : PDF, DOC, DOCX, MP4, AVI</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Ajouter le Support</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animation pour les champs du formulaire
+    $('.form-group').hide().fadeIn(500);
+    
+    // Gestion du label du fichier
+    $('input[type="file"]').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').html(fileName);
+    });
+});
+</script>
+{% endblock %} 

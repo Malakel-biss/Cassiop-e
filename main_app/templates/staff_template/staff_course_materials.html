@@ -1,0 +1,191 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Supports de Cours{% endblock page_title %}
+
+{% block extra_css %}
+<style>
+    .table {
+        color: #333 !important;
+    }
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #333 !important;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .table td {
+        color: #333 !important;
+        vertical-align: middle;
+    }
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+    .filter-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    .filter-section select {
+        color: #333;
+        background-color: white;
+    }
+    /* Forcer la couleur du texte en noir */
+    .table * {
+        color: #333 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Supports de Cours</h3>
+                        <div class="card-tools">
+                            <a href="{% url 'staff_add_course_material' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Ajouter un Support
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Filtres -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Filtrer par matière</label>
+                                    <select class="form-control filter-select" id="subjectFilter">
+                                        <option value="">Toutes les matières</option>
+                                        {% for subject in subjects %}
+                                        <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Filtrer par type</label>
+                                    <select class="form-control filter-select" id="typeFilter">
+                                        <option value="">Tous les types</option>
+                                        <option value="pdf">Document PDF</option>
+                                        <option value="document">Document</option>
+                                        <option value="video">Vidéo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Matière</th>
+                                        <th>Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for material in materials %}
+                                    <tr class="material-row" 
+                                        data-subject="{{ material.subject.id }}"
+                                        data-type="{{ material.material_type }}">
+                                        <td>{{ material.title }}</td>
+                                        <td>{{ material.subject.name }}</td>
+                                        <td>
+                                            {% if material.material_type == 'pdf' %}
+                                                <span class="badge badge-info">PDF</span>
+                                            {% elif material.material_type == 'document' %}
+                                                <span class="badge badge-primary">Document</span>
+                                            {% elif material.material_type == 'video' %}
+                                                <span class="badge badge-success">Vidéo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ material.file.url }}" class="btn btn-info btn-sm" target="_blank">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <a href="{% url 'staff_edit_course_material' material.id %}" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'staff_delete_course_material' material.id %}" class="btn btn-danger btn-sm" 
+                                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce support ?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">Aucun support de cours disponible</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const materialRows = document.querySelectorAll('.material-row');
+
+    function filterMaterials() {
+        const subjectValue = subjectFilter.value;
+        const typeValue = typeFilter.value;
+
+        console.log('Filtrage avec:', {
+            subject: subjectValue,
+            type: typeValue
+        });
+
+        materialRows.forEach(row => {
+            const rowSubject = row.getAttribute('data-subject');
+            const rowType = row.getAttribute('data-type');
+
+            console.log('Vérification ligne:', {
+                rowSubject,
+                rowType,
+                subjectMatch: !subjectValue || rowSubject === subjectValue,
+                typeMatch: !typeValue || rowType === typeValue
+            });
+
+            const subjectMatch = !subjectValue || rowSubject === subjectValue;
+            const typeMatch = !typeValue || rowType === typeValue;
+
+            if (subjectMatch && typeMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Ajouter les écouteurs d'événements
+    subjectFilter.addEventListener('change', filterMaterials);
+    typeFilter.addEventListener('change', filterMaterials);
+
+    // Appliquer les filtres au chargement
+    filterMaterials();
+});
+</script>
+{% endblock %} 

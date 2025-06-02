@@ -1,0 +1,10 @@
+[33m291d3e54[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mupdate-from-old-project[m[33m)[m HEAD@{0}: checkout: moving from update-from-old-project to update-from-old-project
+[33m291d3e54[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mupdate-from-old-project[m[33m)[m HEAD@{1}: fast-import
+[33mbc48a8f4[m HEAD@{2}: commit: Remove large files from Git history
+[33me9a4a373[m HEAD@{3}: commit: Track large files using Git LFS
+[33m0c385905[m HEAD@{4}: checkout: moving from update-from-old-project to update-from-old-project
+[33m0c385905[m HEAD@{5}: commit: Added video transcription and PDF handling for lessons
+[33ma3de2fc7[m HEAD@{6}: commit: updates
+[33mc943be6b[m HEAD@{7}: checkout: moving from feature/modules-lessons to update-from-old-project
+[33mc943be6b[m HEAD@{8}: checkout: moving from main to feature/modules-lessons
+[33mc943be6b[m HEAD@{9}: clone: from https://github.com/Malakel-biss/Cassiop-e

@@ -1,0 +1,216 @@
+Bonjour tout le monde, c'est Morgan, vous assurez l'algorithme pour la formation sur les algorithmes de machine learning linéaire.
+Si vous aimez cette série de vidéos, abonnez-vous et aimez la vidéo faire rionner toujours plus largement ces contenus.
+Dans cette vidéo, vous allez découvrir toute la théorie sur la régulation linéaire.
+Vous allez découvrir tout sur son fonctionnement, comment les heureux récalculer et comment les paramètres sont optimisés grâce à l'algorithme du gradient descent.
+Sachez que vous pouvez retrouver tous les documents de cette formation via un lien directement dans la description ou sur le site AIFORU.fr avec une version online de la formation.
+Maintenant, laissez-go !
+La régression linéaire est un algorithme de machine learning permettant de résoudre des problèmes de régression.
+Un problème de régression est un problème d'apprentissage supervisé où l'on prédit une variable continue.
+Dans notre exemple, nous allons prédire le prix d'une maison qui est une variable continue car elle peut prendre n'importe quel valeur entre zéro et plus l'infini.
+Nous avons, en notre disposition, un jeu de données labellisé avec des variables explicatives X qui nous donne des informations sur le problème que nous essayons de résoudre.
+Ici, on a la surface de la maison, son nombre de pièces et l'année de construction.
+On a également la variable Y qui est notre variable cible qui correspond au prix de chaque maison.
+L'idée est de créer un modèle qui prend en montrer les variables explicatives et qui arrivent en fonction de ces données à prédire le prix des maisons et notre variable Y.
+Pour la suite de notre exemple, nous allons seulement utiliser la variable explicative sur face pour prédire le prix de notre maison afin de simplifier le problème pour mieux visualiser et mieux le comprendre.
+On va commencer par visualiser notre problème. Nous avons, en appétit, la surface de notre maison et en ordonné le prix de cette maison.
+Chaque point bleu correspond à l'association de la surface et du prix pour chaque maison.
+On peut remarquer une tendance à l'augmentation du prix lorsque la surface augmente.
+et mieux le comprendre. On va commencer par visualiser notre problème. Nous avons
+un appétit de la surface de notre maison et en ordonné le prix de cette maison.
+Chaque point bleu correspond à l'association de la surface et du prix pour chaque maison.
+On peut remarquer une tendance à l'augmentation du prix lorsque la surface augmente.
+On pourrait modéliser l'interaction entre se deux variables entre assants une droite.
+Comme cela, si j'ai une nouvelle maison avec une surface de 45m par exemple,
+je peux utiliser cette droite pour présire le prix de cette maison.
+L'expression mathématique de cette fonction est celle d'une droite.
+On a bien Y, Y, Y, Y, X, Y. Vous avez déjà vu cette équation en terminale
+lorsque vous étudiez les fonctions à fine. Vous avez déjà vu cette forme, F, D, X,
+Y, A, X plus B. La fonction reste la même. Les changements sont seulement
+du à des conventions différentes. Ici, W0 est égal à B qui est notre ordonné à l'origine
+et A est égal à W1 qui est le coefficient appliqué à notre variable X1.
+Ici, nous sommes dans le cas où on utilise seulement une variable explicative X1 pour résoudre
+notre problème. Mais dans le cas général, on peut avoir autant de variables explicatives
+que l'on veut. Donc voici l'expression de notre modèle dans le cas général.
+Ici, on a W2 qui est le coefficient appliqué à une seconde variable X2 et ainsi
+de suite jusqu'à WN qui est le coefficient appliqué à la variable XN.
+Revenons à notre exemple avec une seule variable et avec deux paramètres W0 qui est
+lors de nels origines et W1 qui est le coefficient directeur de notre droite.
+Pour une valeur de W0 et W1, on peut obtenir une droite.
+Mais si on change les valeurs, on change également la représentation de cette droite.
+Pour résoudre notre problème, un exemple, qu'elle paramètre devant nous choisir.
+On peut choisir une infimidienne paramètre qui nous donne une infinité de droite qui passera
+par nos points. Pour nous aider à choisir les paramètres qui sont les meilleurs pour notre modèle,
+nous allons intégrer une nouvelle notion, la notion d'erreurs et de coups.
+Imaginons que j'ai décidé de prendre des paramètres qui me donnent cette droite.
+À partir de cette droite, on peut calculer l'erreur de prédiction.
+Cette erreur est la distance entre le prix réel de la maison donnée par notre point bleu
+et le prix de la maison estimé par notre droite rouge.
+Cette distance est l'erreur de prédiction de notre droite.
+On va calculer cette erreur pour chacun de nos exemples.
+Si je reprends mon problème et que je trace une nouvelle droite,
+je peux visualiser un nouveau mes erreurs par rapport à cette droite
+et on peut voir que l'erreur a l'air moins importante que précédemment.
+Donc l'objectif est de trouver une droite qui minimise cette erreur de prédiction.
+Nous arrivons à continuer visuellement l'erreur de prédiction de la droite
+car nous avons qu'une variable explicative est très peu de point.
+L'idée est de trouver une fonction qui estime l'erreur de prédiction de notre modèle.
+Cette fonction se nomme la fonction de coup car elle calcule le coup,
+c'est-à-dire l'erreur de notre modèle.
+Par défaut, on pourrait dire que l'on calcule la distance entre y capot
+qui est l'estimation de notre modèle et y qui est la valeur réelle.
+Pour le reste, ils ont seulement à sommer les erreurs
+et à le diviser par le nombre d'exemples et on aurait une erreur moyenne.
+L'imagine donc que notre modèle prédise un prix d'appartement de 500 euros.
+Alors que la valeur réelle est de 550.
+La différence serait de moins 20.
+Pour mon seconde exemple, le modèle a fait une prédiction de 350.
+Alors que la valeur réelle est de 320.
+La différence serait de 30.
+Si on somme, c'est de valeur, on obtient une erreur moyenne de 5.
+Ce qui est faux.
+Pour éviter cette erreur, on va mettre les erreurs au carré,
+afin que toutes les erreurs soient positives.
+Dans cette manière, ils ne vont plus s'annuler en train et nous pouvons sommer nos erreurs sans problème.
+Maintenant, nous avons notre fonction de coup,
+mais nous avons toujours pas comment choisir les différents paramètres de notre modèle.
+Ce que l'on peut faire, c'est tester différents modèles, calculer les erreurs associés
+et choisir le modèle avec le moins d'erreurs.
+On va essayer à le trouver les meilleures paramètres pour résoudre un problème ici avec nos trois exemples.
+Je rappelle l'expression mathématique de notre modèle,
+dans cet exemple, W0 sera fixé à 0
+et nous allons optimiser uniquement le coefficient W1.
+Nous allons également tracer un deuxième graphique,
+la fonction de coup, GW, en fonction des différentes valeurs de W1.
+A chaque valeur de W1 sera associée une valeur de coup différente.
+Je rappelle l'expression mathématique de notre fonction de coup.
+On commence à W1, égal à 0.
+Ce qui correspond à cette représentation graphique.
+On visualise le coup, puis on le calcule.
+On reporte le coup associé à la valeur 0 de W1 sur le graphique de coup.
+On va tester pour W1, égal à 05.
+La fonction sera proche de nos exemples, mais il y a toujours de l'erreur.
+Et l'erreur est estimé à 068.
+On peut le reporter également sur notre graphique.
+On peut tester également W1, égal à 1.
+Ici, on remarque que le modèle est parfait.
+Effectivement, le coup est égal à 0.
+On peut le reporter également sur notre graphique.
+On peut continuer au test pour W1, égal à 1,5 et 2.
+Si on reline au point, on obtient une estimation de la distribution de l'erreur
+en fonction des différentes valeurs de W1.
+On peut voir que pour W1, égal à 1, l'erreur est au minimum.
+Notre modèle aura donc pour paramètres W0, égal à 0 et W1, égal à 1.
+On peut faire la même chose en faisant un varié W1 et W0 en même temps.
+Mais pour tracer le coup en fonction des différentes valeurs de W0 et W1,
+il nous faudrait un graphique en trois dimensions.
+Ici, on a ajouté une nouvelle variable.
+Ce ne serait alors plus possible de visualiser notre coup
+en fonction des différentes valeurs de nos paramètres
+parce qu'on aurait dépassé les trois dimensions.
+De plus, pour obtenir ces cas de coup,
+on est obligé de tester toutes les valeurs possibles
+pour nos paramètres, ce qui est très long en temps de calcul.
+On va donc essayer de trouver de manière analytique
+de résoudre notre problème en utilisant l'algorithme de la descente du gradient.
+En France, on appelle descente de gradient,
+mais on va plus souvent appeler cette algorithme sous son nom anglais,
+le gradient descente.
+Donc, désolé, je fais un peu d'angle seismici.
+Donc, soit N, le nombre de variables,
+on aura des paramètres tout le VG qui seront entre 1 et N.
+Le objectif va être de trouver une fonction
+qui modifira les paramètres WG,
+afin qu'ils minimisent la fonction de coup GW.
+On utilise donc la formule que vous voyez à l'écran.
+Le deux points égal correspond à l'affectation,
+ça veut dire que la valeur WG sera remplacée par le résultat
+de notre expression à droite.
+L'expression est découpée en trois termes différents.
+En premier, on a l'ancienne valeur de WG,
+à laquelle on va soustraire la suite de l'expression.
+On a le learning rate, donc désolé encore un peu d'angle seism,
+la traduction est au d'apprentissage,
+et vous le verrez nulle part,
+donc autant apprendre les noms utiles,
+donc le learning rate est un nombre entre 0 et 1,
+qui permet de contrôler la mise à jour des paramètres WG.
+Le dernier terme est la dérivée partielle de GW,
+par rapport aux paramètres que l'on souhaite mettre à jour WG.
+Le objectif sera de commencer avec des valeurs de WG à l'éatoir
+et de les changer au fil du temps,
+afin d'obtenir des valeurs de WG,
+minimisant la fonction de coût GW.
+Pour le moment, ça peut vous paraître un peu abstrait,
+mais vous allez voir qu'au fil de l'exemple que je vais vous montrer après,
+ça ira de mieux en mieux.
+Reprenons la cours tracée précédemment,
+GW en fonction de W1.
+Commence donc en T0,
+avec un paramètre W1 à l'éatoir,
+en calcul l'erreur de prédiction de notre jeu de données
+et en obtient son coût associé.
+On applique maintenant l'expression du gradient d'essence
+pour obtenir la nouvelle valeur de W1 à T1.
+Il faut donc déterminer la valeur de la dérivée partielle
+si vous souvez bien de vos cours de maths du lycée.
+La valeur d'une dérivée en un point
+est égale à la valeur du coût officiant directeur de la tangente en ce point.
+Ici, on a le coût officiant directeur d'une droite croissante.
+Donc la valeur de la dérivée partielle est un nombre positif.
+Learning rate est un nombre entre 0 et 1,
+donc c'est un nombre positif.
+Donc une multiplication entre de nombre positif donne encore un nombre positif.
+Si l'on soustrait W1 à un nombre positif, on entiendra en T1
+une valeur de W1 plus petite quant est 0.
+Si on prend cette nouvelle valeur de W1
+et que l'on calcule le coût associé,
+on remarque que le coût associé est plus faible que précédemment.
+Maintenant, on vous allez me dire,
+mais si la valeur de W1 à T0 initialisée se trouve de l'autre côté de la pente,
+est-ce que l'on va remonter la pente?
+Eh bien, on va voir que ça ne change rien.
+Nous allons le voir avec cet exemple,
+où on prend une valeur de W1 proche de 0
+avec un coût associé proche de 2,3.
+Nous allons appliquer l'algorithme du radien de descents.
+On va calculer la valeur de la dérivé partielle.
+La valeur de la dérivé partielle est également la valeur du coût efficient directeur de sa tangente en ce point.
+Ici, on voit que la droite, donc la tangente est décroissante.
+Donc la valeur de la dérivé partielle sera négative.
+Learning rate reste positif.
+Donc la multiplication entre un nombre négatif et positif donne une valeur négative.
+Et si on soustrait un nombre négatif,
+ça revient à additionner la valeur à l'expression W1.
+Donc la nouvelle valeur de W1 en T1 sera donc plus grande que l'ancienne valeur en T0.
+On a donc notre nouvelle valeur W1 en T1.
+Cette valeur est associée à un coût plus faible que précédemment.
+L'objectif est de réitérer l'application du radien de descents
+jusqu'à faire converger notre modèle vers une erre minimum.
+Pour atteindre le minimum, on ne peut pas compter sur le learning rate qui reste fixe.
+Il faut donc compter sur la dérivé partielle qui va diminuer au fur et à mesure qu'on l'approche du minimum.
+Souvenez-vous que la dérivé partielle est égale à la valeur du coût si un directeur de la tangente en ce point.
+On peut donc voir que plus on se rapproche du minimum plus la pente diminue.
+Donc plus la dérivé partielle sera petite.
+Jusqu'à atteindre le minimum, on a une droite uniforme et le coût si un directeur d'une droite uniforme est de 0.
+Donc le paramètre W1 ne sera plus mis à jour.
+La valeur de la dérivé partielle aura tendance donc à diminuer à la proche du minimum,
+ce qui rendra le pas de plus en plus petit jusqu'à atteindre le minimum global de notre fonction coût et GW.
+Maintenant que l'on comprend bien, le terme de la dérié partielle passons à l'utilité et l'impact du learning rate.
+La valeur d'une learning rate est constant dans tout l'entraînement et il est compris entre 0 et 1.
+Le rôle du learning rate est de contrôler la mise à jour des poids.
+S'il n'y a pas de learning rate aussi la valeur du learning rate est trop grande,
+le modèle peut avoir des difficultés à converger et même parfois diverger.
+Si la valeur d'une learning rate est trop petite, la convergence peut être très lance et l'entraînement
+peut prendre beaucoup plus de temps à converger.
+Dans l'idée, il vaut mieux avoir la learning rate plus petite et avoir un modèle l'en entraîné mais qui converge
+quand le learning rate trop grand qui empêche la convergence de notre modèle.
+C'est fini pour cette vidéo sur la théorie de la régression linéaire.
+Vous connaissez maintenant toute la théorie, c'est nécessaire mais pas suffisant
+pour comprendre toutes les subtilités de ce modèle de machine learning.
+Sachez que vous pouvez retrouver tous les documents de cette formation via le lien dans la description
+ou directement sur le site et aiforyo.fr avec une version online de la formation.
+Le meilleur moyen de bien comprendre un algorithme et de le coder soit même.
+Et ça tombe bien, car dans la prochaine vidéo de cette formation,
+vous allez implementer From Scratch avec Python tous les concepts vu dans cette vidéo.
+On se retrouve dans la prochaine vidéo pour implementer tous ces concepts From Scratch avec Python.
+Allez, ciao !

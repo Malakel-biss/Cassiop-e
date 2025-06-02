@@ -1,0 +1,91 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Demande de Congé{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Nouvelle Demande de Congé</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Date du congé</label>
+                                {{ form.date }}
+                                {% if form.date.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.date.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label>Message</label>
+                                {{ form.message }}
+                                {% if form.message.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.message.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Historique des Demandes</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Message</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leave_history %}
+                                <tr>
+                                    <td>{{ leave.date }}</td>
+                                    <td>{{ leave.message }}</td>
+                                    <td>
+                                        {% if leave.status == 0 %}
+                                            <span class="badge badge-warning">En attente</span>
+                                        {% elif leave.status == 1 %}
+                                            <span class="badge badge-success">Approuvé</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Refusé</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">Aucune demande de congé</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

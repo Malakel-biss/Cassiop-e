@@ -1,0 +1,96 @@
+{% extends 'student_template/student_base.html' %}
+
+{% block student_content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Exercices Google Colab</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-info">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if notebooks %}
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> Les exercices Google Colab vous permettent d'apprendre et de pratiquer l'IA et la data science directement dans votre navigateur.
+                </div>
+                
+                <div class="row">
+                    {% for notebook in notebooks %}
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="m-0">{{ notebook.title }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ notebook.description|truncatechars:150 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <a href="{% url 'student_view_colab_notebook' notebook.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-play"></i> Accéder
+                                        </a>
+                                    </div>
+                                    <small class="text-muted">Module: {{ notebook.subject.name }}</small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge badge-{% if notebook.difficulty == 'beginner' %}success{% elif notebook.difficulty == 'intermediate' %}warning{% else %}danger{% endif %}">
+                                            {{ notebook.get_difficulty_display }}
+                                        </span>
+                                        <small class="text-muted ml-2">
+                                            <i class="far fa-clock"></i> {{ notebook.estimated_time }} min
+                                        </small>
+                                    </div>
+                                    
+                                    {% for progress_notebook, progress in student_progress.items %}
+                                        {% if progress_notebook == notebook.id %}
+                                        <div>
+                                            {% if progress.is_completed %}
+                                            <span class="badge badge-success">Complété</span>
+                                            {% else %}
+                                            <div class="progress" style="width: 100px; height: 10px;">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ progress.progress_percent }}%;" aria-valuenow="{{ progress.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-muted">{{ progress.progress_percent|floatformat:0 }}%</small>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fa fa-exclamation-triangle"></i> Aucun notebook Google Colab n'est disponible pour le moment.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        $('.table').DataTable({
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.22/i18n/French.json"
+            }
+        });
+    });
+</script>
+{% endblock %} 

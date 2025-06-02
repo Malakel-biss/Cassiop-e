@@ -1,0 +1,134 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Mon Profil{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Informations Personnelles</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-primary" id="editBtn">Modifier le profil</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data" id="profileForm">
+                            {% csrf_token %}
+                            <div class="row">
+                                <!-- Photo de profil -->
+                                <div class="col-md-3 text-center">
+                                    <div class="profile-image-container mb-4">
+                                        {% if student.admin.profile_pic %}
+                                            <img src="{{ MEDIA_URL }}{{ student.admin.profile_pic }}" alt="Photo de profil" class="img-fluid rounded-circle profile-img" style="width: 200px; height: 200px; object-fit: cover; border: 3px solid #007bff;">
+                                        {% else %}
+                                            <img src="{% static 'dist/img/default-avatar.png' %}" alt="Photo de profil par défaut" class="img-fluid rounded-circle profile-img" style="width: 200px; height: 200px; object-fit: cover; border: 3px solid #007bff;">
+                                        {% endif %}
+                                    </div>
+                                    <div class="profile-pic-upload" style="display: none;">
+                                        <label for="profile_pic" class="form-label">Changer la photo</label>
+                                        <input type="file" class="form-control" id="profile_pic" name="profile_pic" accept="image/*">
+                                    </div>
+                                </div>
+
+                                <!-- Informations personnelles -->
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Nom</label>
+                                                <input type="text" class="form-control" name="first_name" value="{{ student.admin.first_name }}" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Prénom</label>
+                                                <input type="text" class="form-control" name="last_name" value="{{ student.admin.last_name }}" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" value="{{ student.admin.email }}" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Adresse</label>
+                                                <textarea class="form-control" name="address" rows="3" readonly>{{ student.admin.address }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Filière</label>
+                                                <input type="text" class="form-control" value="{{ student.course.name }}" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Sexe</label>
+                                                <select class="form-select" name="gender" disabled>
+                                                    <option value="M" {% if student.admin.gender == 'M' %}selected{% endif %}>Masculin</option>
+                                                    <option value="F" {% if student.admin.gender == 'F' %}selected{% endif %}>Féminin</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Mot de passe</label>
+                                                <input type="password" class="form-control" name="password" placeholder="Laissez vide pour ne pas changer" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="display: none;">
+                                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Annuler</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        $('#editBtn').click(function() {
+            $('input[name="first_name"], input[name="last_name"], textarea[name="address"], select[name="gender"], input[name="password"]').prop('readonly', false);
+            $('select[name="gender"]').prop('disabled', false);
+            $('input[name="password"]').prop('disabled', false);
+            $('.profile-pic-upload').show();
+            $('.card-footer').show();
+            $(this).hide();
+        });
+
+        $('#cancelBtn').click(function() {
+            $('input[name="first_name"], input[name="last_name"], textarea[name="address"], select[name="gender"], input[name="password"]').prop('readonly', true);
+            $('select[name="gender"]').prop('disabled', true);
+            $('input[name="password"]').prop('disabled', true);
+            $('.profile-pic-upload').hide();
+            $('.card-footer').hide();
+            $('#editBtn').show();
+            // Réinitialiser le formulaire
+            document.getElementById('profileForm').reset();
+        });
+
+        // Prévisualisation de l'image
+        $('#profile_pic').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('.profile-img').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Message de confirmation pour le changement de mot de passe
+        $('input[name="password"]').on('change', function() {
+            if (!$(this).data('notified')) {
+                $(this).data('notified', true);
+                alert("Après une mise à jour réussie du profil :\n\nVotre session sera terminée\nVous devrez vous reconnecter");
+            }
+        });
+    });
+</script>
+{% endblock custom_js %}

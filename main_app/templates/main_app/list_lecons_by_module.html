@@ -1,0 +1,19 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}Liste des Leçons{% endblock page_title %}
+
+{% block content %}
+  <h1>Leçons pour le module: {{ module.name }}</h1>
+  <ul>
+    {% for lecon in lecons %}
+      <li>
+        {{ lecon.name }}
+        <!-- Add a button to view the lesson -->
+        <a href="{% url 'view_lesson' lecon.id %}" class="btn btn-primary">Voir la leçon</a>
+      </li>
+    {% empty %}
+      <li>Aucune leçon disponible pour ce module.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
