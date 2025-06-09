@@ -26,28 +26,26 @@
       </div>
     </div>
 
-    <!-- 🤖 CHATBOT COLUMN (~45%) -->
-    <div class="col-lg-5 d-flex align-items-stretch">
-      <div class="card w-100 d-flex flex-column" style="height: 70%;">
-        <div class="card-header bg-primary text-white">Assistant IA</div>
+<div class="col-lg-5 d-flex align-items-stretch">
+  <div class="card w-100 d-flex flex-column" style="height: 50vh;">
+    <div class="card-header bg-primary text-white">Assistant IA</div>
 
-        <!-- Scrollable Chat Area -->
-        <div id="chat-log" class="flex-grow-1 p-3">
-          <!-- Chat messages go here -->
-        </div>
+    <!-- Scrollable Chat Area -->
+    <div id="chat-log" class="p-3" style="flex: 1 1 auto; overflow-y: auto;">
+      <!-- Chat messages go here -->
+    </div>
 
-        <!-- Input Row -->
-        <div class="p-2 border-top bg-white d-flex align-items-center gap-2">
-          <input id="chat-input" class="form-control rounded-pill flex-grow-1" placeholder="Envoyer un message..." />
-          <button onclick="sendLessonChat()" class="btn btn-primary chat-send-btn rounded-pill">Envoyer</button>
-          <button id="record-btn" class="btn btn-danger rounded-pill" 
-                  onmousedown="startRecording()" 
-                  onmouseup="stopRecording()">Record</button>
-        </div>
-      </div>
+    <!-- Input Row -->
+    <div class="p-2 border-top bg-white d-flex align-items-center gap-2">
+      <input id="chat-input" class="form-control rounded-pill flex-grow-1" placeholder="Envoyer un message..." />
+      <button onclick="sendLessonChat()" class="btn btn-primary chat-send-btn rounded-pill">Envoyer</button>
+      <button id="record-btn" class="btn btn-danger rounded-pill" 
+              onmousedown="startRecording()" 
+              onmouseup="stopRecording()">Record</button>
     </div>
   </div>
 </div>
+
 
 <div class="d-flex justify-content-center flex-wrap my-4" style="gap: 3rem;">
   <!-- 📄 PDF + Notes Column (~30%) -->

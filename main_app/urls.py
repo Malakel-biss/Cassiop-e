@@ -213,9 +213,8 @@ urlpatterns = [
     path('modules/<int:module_id>/lessons/', views.list_lecons_by_module, name='list_lecons_by_module'),
     path('lecons/<int:lesson_id>/', views.view_lesson, name='view_lesson'),
 
-    # DRF API endpoints
     path('api/', include(router.urls)),
-    path("chatbot/", include("main_app.ai_assistant.urls")),  # <- this line is required
+    path("chatbot/", include("main_app.ai_assistant.urls")),  
 
 ]
 

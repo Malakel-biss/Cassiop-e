@@ -63,9 +63,21 @@ def add_module(request):
 from django.shortcuts import render
 from .models import Lesson  # or Lecon if that's the model name
 
-def list_lessons(request):
-    lessons = Lesson.objects.select_related('module').all()
-    return render(request, 'main_app/list_lessons.html', {'lessons': lessons})
+def list_lessons(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    lecons = list(module.lecon_set.all())
+
+    colors = ["bg-primary", "bg-success", "bg-warning", "bg-danger", "bg-info", "bg-secondary", "bg-dark"]
+
+    # Assigne une couleur à chaque leçon
+    for idx, lecon in enumerate(lecons):
+        lecon.bg_color = colors[idx % len(colors)]
+
+    return render(request, 'main_app/lecons_list.html', {
+        'module': module,
+        'lecons': lecons
+    })
+
 
 @login_required
 def list_modules(request):

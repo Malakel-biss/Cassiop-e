@@ -1,17 +1,13 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
 
-{% block page_title %}Liste des Leçons{% endblock page_title %}
 
 {% block content %}
 <section class="content">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Liste des Leçons</h2>
-            <div>
-                <a href="{% url 'add_lesson' %}" class="btn btn-success mr-2">➕ Ajouter une Leçon</a>
-                <a href="{% url 'add_module' %}" class="btn btn-primary">📚 Ajouter un Module</a>
-            </div>
+
         </div>
 
         <table class="table table-bordered table-striped">

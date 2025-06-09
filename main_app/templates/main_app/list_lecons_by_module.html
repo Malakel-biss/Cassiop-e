@@ -1,19 +1,54 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
 
-{% block page_title %}Liste des Leçons{% endblock page_title %}
+{% block page_title %}Liste des Leçons{% endblock %}
 
 {% block content %}
-  <h1>Leçons pour le module: {{ module.name }}</h1>
-  <ul>
-    {% for lecon in lecons %}
-      <li>
-        {{ lecon.name }}
-        <!-- Add a button to view the lesson -->
-        <a href="{% url 'view_lesson' lecon.id %}" class="btn btn-primary">Voir la leçon</a>
-      </li>
-    {% empty %}
-      <li>Aucune leçon disponible pour ce module.</li>
-    {% endfor %}
-  </ul>
+<style>
+  .lesson-card {
+    min-height: 180px;
+    border: none;
+    border-radius: 1rem;
+    transition: transform 0.2s ease-in-out;
+    color: black; /* ✅ Texte noir */
+  }
+
+  .lesson-btn {
+    background-color: rgba(0, 0, 0, 0.1); /* léger fond clair */
+    color: black; /* ✅ texte noir */
+    border: none;
+  }
+
+  .lesson-btn:hover {
+    background-color: rgba(0, 0, 0, 0.15);
+    color: black;
+  }
+</style>
+
+
+  <div class="container py-4">
+    <h1 class="mb-5 text-center">📚 Leçons pour le module : <span class="text-primary">{{ module.name }}</span></h1>
+
+    {% if lecons %}
+      <div class="row g-4">
+        {% for lecon in lecons %}
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card lesson-card {{ lecon.bg_color }}">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title">{{ lecon.name }}</h5>
+                <p class="card-text">Cliquez ci-dessous pour accéder à la leçon.</p>
+              </div>
+              <div class="card-footer bg-transparent border-0">
+                <a href="{% url 'view_lesson' lecon.id %}" class="btn lesson-btn w-100 rounded-pill">Voir la leçon</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center rounded-3 mt-5">
+        Aucune leçon disponible pour ce module.
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}

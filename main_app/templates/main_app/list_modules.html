@@ -1,13 +1,11 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
-{% block page_title %}Liste des Modules{% endblock page_title %}
 
 {% block content %}
 <section class="content">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Liste des Modules</h2>
-            <a href="{% url 'add_module' %}" class="btn btn-primary">➕ Ajouter un Module</a>
         </div>
 
         <table class="table table-bordered table-hover">

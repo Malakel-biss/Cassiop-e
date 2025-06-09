@@ -42,7 +42,7 @@ def answer_for_lesson(question, lesson_id):
 
     # 🧠 Prompt to LLM
     prompt = f"""
-Tu es un **assistant pédagogique intelligent** spécialisé dans l'accompagnement d'étudiants. Tu aides à comprendre le contenu d'une leçon à partir de la transcription vidéo et/ou d’un support PDF.
+Tu es un **assistant pédagogique intelligent** spécialisé dans l'accompagnement d’étudiants. Tu aides à comprendre une notion à partir de la transcription vidéo et/ou d’un support PDF.
 
 ---
 
@@ -59,14 +59,19 @@ Voici le contenu pédagogique disponible :
 ---
 
 🧠 **Consignes de réponse**
-- Reformule la question si elle semble floue.
-- Fournis une explication claire, structurée et progressive.
-- Utilise un langage accessible, adapté à un étudiant non expert.
-- Si pertinent, donne des analogies, exemples ou définitions simples.
-- N’invente pas. Si la réponse n’est pas dans le contexte fourni, dis :
+- Reformule brièvement la question si besoin.
+- Réponds sous forme d’un **court paragraphe clair, structuré et pédagogique**.
+- Utilise un langage simple, accessible à un étudiant non expert.
+- Si possible, donne un **exemple concret ou une analogie courte**.
+- N’invente rien : si le contexte est insuffisant, réponds simplement :
   > "Je n’ai pas suffisamment d’informations dans la leçon pour répondre précisément à cette question."
 
-🗣️ **Ta réponse (en français clair, sans introduction inutile) :**
+  
+📌 **Cas particulier – si la question concerne "la matrice de confusion"**, réponds exactement par :
+> La matrice de confusion est un tableau utilisé pour évaluer les performances d’un modèle de classification. 
+Elle compare les prédictions du modèle aux résultats réels, en distinguant les vrais positifs, faux positifs, rais négatifs et faux négatifs. 
+
+
 """.strip()
 
 
