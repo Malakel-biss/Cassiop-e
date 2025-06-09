@@ -1,0 +1,56 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}Liste des Leçons{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Liste des Leçons</h2>
+            <div>
+                <a href="{% url 'add_lesson' %}" class="btn btn-success mr-2">➕ Ajouter une Leçon</a>
+                <a href="{% url 'add_module' %}" class="btn btn-primary">📚 Ajouter un Module</a>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Titre</th>
+                    <th>Module</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Fichier</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lesson in lessons %}
+                <tr>
+                    <td>{{ lesson.title }}</td>
+                    <td>{{ lesson.module.name }}</td>
+                    <td>{{ lesson.description }}</td>
+                    <td>{{ lesson.material_type }}</td>
+                    <td>
+                        {% if lesson.file %}
+                            <a href="{{ lesson.file.url }}" target="_blank">Voir</a>
+                        {% else %}
+                            Aucun
+                        {% endif %}
+                    </td>
+                    <td>
+                        <!-- Add a button to view the lesson details -->
+                        <a href="{% url 'view_lesson' lesson.id %}" class="btn btn-info">Voir la leçon</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucune leçon trouvée.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     # My Apps
-    'main_app.apps.MainAppConfig'
+    'main_app.apps.MainAppConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -83,6 +83,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'student_management_system.wsgi.application'
 
+RUNSERVER_PLUS = {
+    'reloader_type': 'stat',  # more stable
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

@@ -8,6 +8,104 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
+import os, json
+from main_app.ai_assistant.transcript import generate_transcript
+
+
+
+import os
+
+# Update staff_views.py to handle PDF text extraction
+from main_app.ai_assistant.pdf_parser import extract_text_from_pdf
+
+@login_required
+def add_lesson(request):
+    if request.method == "POST":
+        module_id = request.POST.get("module")
+        name = request.POST.get("name")
+        pdf = request.FILES.get("pdf")
+        video = request.FILES.get("video")
+
+        try:
+            module = Module.objects.get(id=module_id)
+            lesson = Lesson.objects.create(
+                module=module,
+                name=name,
+                pdf=pdf,
+                video=video
+            )
+
+            # Step 1: Extract PDF text if a PDF is uploaded
+            if lesson.pdf:
+                pdf_path = lesson.pdf.path
+                pdf_text = extract_text_from_pdf(pdf_path)
+                if pdf_text:
+                    lesson.pdf_text = pdf_text  # Save extracted PDF text to DB
+                    lesson.save()
+                    print(f"✅ PDF text saved for lesson {lesson.id}")
+
+            # Step 2: Continue with video transcription (as before)
+            if lesson.video:
+                video_path = lesson.video.path
+                transcript_text = generate_transcript(video_path, lesson.id)  # Save plain text
+
+                if transcript_text:
+                    lesson.transcript = transcript_text  # Save plain transcript to DB
+                    lesson.save()
+
+                    # Step 3: Save the JSON transcript in DB
+                    json_path = os.path.join("media", "transcripts", f"{lesson.id}_transcript.json")
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        transcript_json = json.load(f)
+                        lesson.transcript_json = transcript_json  # Save JSON in DB
+                        lesson.save()
+
+                    print(f"✅ Transcript and JSON saved to DB for lesson {lesson.id}")
+
+            messages.success(request, "Leçon ajoutée avec succès.")
+
+        except Module.DoesNotExist:
+            messages.error(request, "Module invalide.")
+
+        return redirect("add_lesson")
+
+    modules = Module.objects.all()
+    return render(request, "main_app/add_lesson.html", {"modules": modules})
+
+
+def staff_add_course_material(request):
+    if request.method == "POST":
+        form = CourseMaterialForm(request.POST, request.FILES)
+        if form.is_valid():
+            material = form.save(commit=False)
+            material.staff = request.user
+            material.save()
+
+            # 🔥 Transcript generation
+            video_path = material.video.path  # or material.file.path
+            transcript = generate_transcript(video_path)
+
+            if transcript:
+                transcript_dir = os.path.join("data", "transcripts")
+                os.makedirs(transcript_dir, exist_ok=True)
+                transcript_path = os.path.join(transcript_dir, f"{material.id}.json")
+
+                with open(transcript_path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        [{"start": 0, "end": 9999, "text": transcript}],
+                        f,
+                        indent=2,
+                        ensure_ascii=False
+                    )
+                print("✅ Transcript saved for video:", material.id)
+
+            return redirect("some_success_view")
+
+    else:
+        form = CourseMaterialForm()
+
+    return render(request, "staff_template/staff_add_course_material.html", {"form": form})
+
 
 from .forms import *
 from .models import *

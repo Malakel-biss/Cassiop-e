@@ -232,6 +232,30 @@ python manage.py create_computer_sensors
 python manage.py collectstatic
 ```
 
+<<<<<<< HEAD
+=======
+## 🔌 Capteurs IoT
+
+### Types de Capteurs Supportés
+- CPU (Utilisation, température, fréquence)
+- Mémoire (Utilisation RAM, swap)
+- Disque (Espace, vitesse de lecture/écriture)
+- Réseau (Bande passante, paquets)
+
+### Ajout d'un Nouveau Capteur
+1. Accéder à l'interface d'administration
+2. Naviguer vers "IoT Devices"
+3. Cliquer sur "Ajouter un capteur"
+4. Remplir les informations requises
+5. Sauvegarder
+
+### Visualisation des Données
+- Graphiques en temps réel
+- Historique des mesures
+- Export des données
+- Analyse des tendances
+
+>>>>>>> b57c9d35
 ## 📚 API Documentation
 
 ### Endpoints Principaux
@@ -268,6 +292,7 @@ GET /api/iot-analysis/
 ### Standards de Code
 - PEP 8 pour Python
 - ESLint pour JavaScript
+<<<<<<< HEAD
 - Documentation à jour
 
 
@@ -275,4 +300,17 @@ GET /api/iot-analysis/
 <div align="center">
   <p>Made with ❤️ by l'équipe Cassiopée</p>
   <p>© 2025 Cassiop-e. Tous droits réservés.</p>
+=======
+- Tests unitaires requis
+- Documentation à jour
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+
+<div align="center">
+  <p>Made with ❤️ by l'équipe Cassiop-e</p>
+  <p>© 2024 Cassiop-e. Tous droits réservés.</p>
+>>>>>>> b57c9d35
 </div>

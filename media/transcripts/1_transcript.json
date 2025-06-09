@@ -1,0 +1,257 @@
+[
+  {
+    "start": 0.0,
+    "end": 22.56,
+    "text": "Logistic regression is a statistical technique that models the probability and event given"
+  },
+  {
+    "start": 22.56,
+    "end": 24.68,
+    "text": "one or more independent variables."
+  },
+  {
+    "start": 24.68,
+    "end": 30.240000000000002,
+    "text": "You'll start with input data that is of any numeric type, but the output variable will"
+  },
+  {
+    "start": 30.240000000000002,
+    "end": 31.240000000000002,
+    "text": "be binary."
+  },
+  {
+    "start": 31.240000000000002,
+    "end": 36.92,
+    "text": "It'll be zero or one indicating a false or true value respectively."
+  },
+  {
+    "start": 36.92,
+    "end": 42.04,
+    "text": "You then fit this S-shaped curve called the logistic function to this data."
+  },
+  {
+    "start": 42.04,
+    "end": 46.44,
+    "text": "It can then be used to make predictions of probability whether or not an event will happen,"
+  },
+  {
+    "start": 46.44,
+    "end": 52.44,
+    "text": "such as given so many hours of rain, what is the probability of a flood."
+  },
+  {
+    "start": 52.44,
+    "end": 57.72,
+    "text": "Notice how these points can project themselves onto the logistic function and we can use"
+  },
+  {
+    "start": 57.72,
+    "end": 62.199999999999996,
+    "text": "maximum likelihood estimation to fit the curve which we'll talk about shortly."
+  },
+  {
+    "start": 62.199999999999996,
+    "end": 69.36,
+    "text": "Notice that there are these middle points where there is a mix of true and false cases."
+  },
+  {
+    "start": 69.36,
+    "end": 74.12,
+    "text": "If these points follow a transitional trend of increasingly showing an event more likely"
+  },
+  {
+    "start": 74.12,
+    "end": 79.92,
+    "text": "to happen or not happen, you will see that that S-shaped curve will climb or decrease"
+  },
+  {
+    "start": 79.92,
+    "end": 81.6,
+    "text": "respectively."
+  },
+  {
+    "start": 81.60000000000001,
+    "end": 86.24000000000001,
+    "text": "We can then leverage it to predict a probability between zero and one."
+  },
+  {
+    "start": 86.24000000000001,
+    "end": 90.16000000000001,
+    "text": "Let's take a case where we expect 6.2 inches of rain."
+  },
+  {
+    "start": 90.16000000000001,
+    "end": 95.12,
+    "text": "This is going to result in a 0.75 or 75% probability of a flood."
+  },
+  {
+    "start": 95.12,
+    "end": 100.96000000000001,
+    "text": "If we define a threshold say 0.5 and anything greater than 0.5 will be true, anything less"
+  },
+  {
+    "start": 100.96000000000001,
+    "end": 103.00000000000001,
+    "text": "than 0.5 will be false."
+  },
+  {
+    "start": 103.00000000000001,
+    "end": 104.80000000000001,
+    "text": "We will then predict there will be a flood."
+  },
+  {
+    "start": 104.80000000000001,
+    "end": 107.76,
+    "text": "You can move this threshold based on our needs."
+  },
+  {
+    "start": 107.76,
+    "end": 112.64,
+    "text": "For example, if we set it to 0.8, this would actually categorize as false and there won't"
+  },
+  {
+    "start": 112.64,
+    "end": 113.92,
+    "text": "be a flood."
+  },
+  {
+    "start": 113.92,
+    "end": 119.68,
+    "text": "We can also reduce it to say 0.2 and set a much lower barrier to classifying a flood."
+  },
+  {
+    "start": 119.68,
+    "end": 122.48,
+    "text": "This is the function that produces that S-shaped curve."
+  },
+  {
+    "start": 122.48,
+    "end": 126.16000000000001,
+    "text": "E is Euler's number, which is a special constant."
+  },
+  {
+    "start": 126.16000000000001,
+    "end": 129.52,
+    "text": "That beta 1x plus beta 0 is a linear function."
+  },
+  {
+    "start": 129.52,
+    "end": 131.20000000000002,
+    "text": "That is actually the log odds function."
+  },
+  {
+    "start": 131.20000000000002,
+    "end": 134.28,
+    "text": "That is something we will talk about in another video."
+  },
+  {
+    "start": 134.28,
+    "end": 138.2,
+    "text": "What's important to know is that this function will produce that S-shaped curve we need to"
+  },
+  {
+    "start": 138.2,
+    "end": 139.2,
+    "text": "make predictions."
+  },
+  {
+    "start": 139.2,
+    "end": 144.16,
+    "text": "We can also extend this to more input variables to create multi-dimensional logistic regressions"
+  },
+  {
+    "start": 144.16,
+    "end": 149.12,
+    "text": "as shown here."
+  },
+  {
+    "start": 149.12,
+    "end": 151.84,
+    "text": "Let's talk briefly about maximum likelihood estimation."
+  },
+  {
+    "start": 151.84,
+    "end": 157.68,
+    "text": "The way it works is that we are going to take each of these points, multiply their corresponding"
+  },
+  {
+    "start": 157.68,
+    "end": 162.8,
+    "text": "likelihoods together, and that is going to produce our total likelihood."
+  },
+  {
+    "start": 162.8,
+    "end": 167.20000000000002,
+    "text": "We need to find the beta coefficients that will maximize the likelihood of our S-shaped"
+  },
+  {
+    "start": 167.20000000000002,
+    "end": 169.68,
+    "text": "curve producing all of these points."
+  },
+  {
+    "start": 169.68,
+    "end": 174.96,
+    "text": "This can be done with gradient descent, Newton's method, and other optimization techniques."
+  },
+  {
+    "start": 174.96,
+    "end": 179.68,
+    "text": "You might be wondering why did I subtract the false cases from 1.0?"
+  },
+  {
+    "start": 179.68,
+    "end": 183.48000000000002,
+    "text": "This is because we have to treat the false cases as positive so that they are maximized"
+  },
+  {
+    "start": 183.48000000000002,
+    "end": 184.48000000000002,
+    "text": "as well."
+  },
+  {
+    "start": 184.48000000000002,
+    "end": 191.32000000000002,
+    "text": "We will cover this on a separate video talking about maximum likelihood estimation in more depth."
+  },
+  {
+    "start": 191.32,
+    "end": 195.88,
+    "text": "In a separate video, we will talk about how to handle false positives and false negatives,"
+  },
+  {
+    "start": 195.88,
+    "end": 206.32,
+    "text": "and we can use a confusion matrix as a tool to track prediction performance."
+  },
+  {
+    "start": 206.32,
+    "end": 207.48,
+    "text": "Thank you very much for watching."
+  },
+  {
+    "start": 207.48,
+    "end": 209.24,
+    "text": "I hope you enjoyed this video."
+  },
+  {
+    "start": 209.24,
+    "end": 212.79999999999998,
+    "text": "If you want to support this channel, please check out my two books, Getting Star With Sequel"
+  },
+  {
+    "start": 212.79999999999998,
+    "end": 218.04,
+    "text": "as well as Central Math for Data Science, Chapter 6 of Essential Math for Data Science actually"
+  },
+  {
+    "start": 218.04,
+    "end": 222.92,
+    "text": "covers logistic aggression and classification algorithms in depth."
+  },
+  {
+    "start": 222.92,
+    "end": 226.92,
+    "text": "Please like, subscribe, and share, and I will see you next time on pre-minute data science."
+  }
+]
