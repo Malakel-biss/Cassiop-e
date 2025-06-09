@@ -1,0 +1,105 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block title %}Supports de Cours{% endblock title %}
+{% block content %}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Supports de Cours</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'student_home' %}">Tableau de bord</a></li>
+        <li class="breadcrumb-item active">Supports de Cours</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-book me-1"></i>
+                    Supports de Cours Disponibles
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select" id="subjectFilter">
+                                <option value="">Tous les modules</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-select" id="typeFilter">
+                                <option value="">Tous les types</option>
+                                <option value="pdf">Documents PDF</option>
+                                <option value="video">Vidéos</option>
+                                <option value="exercise">Exercices</option>
+                                <option value="other">Autres</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Titre</th>
+                                    <th>Module</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Date d'ajout</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for material in materials %}
+                                <tr data-subject="{{ material.subject.id }}" data-type="{{ material.material_type }}">
+                                    <td>{{ material.title }}</td>
+                                    <td>{{ material.subject.name }}</td>
+                                    <td>{{ material.get_material_type_display }}</td>
+                                    <td>{{ material.description|truncatechars:100 }}</td>
+                                    <td>{{ material.upload_date|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <a href="{{ material.file.url }}" class="btn btn-primary btn-sm" target="_blank">
+                                            <i class="fas fa-download"></i> Télécharger
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Aucun support de cours disponible.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const rows = document.querySelectorAll('#dataTable tbody tr');
+
+    function filterTable() {
+        const selectedSubject = subjectFilter.value;
+        const selectedType = typeFilter.value;
+
+        rows.forEach(row => {
+            const subjectMatch = !selectedSubject || row.dataset.subject === selectedSubject;
+            const typeMatch = !selectedType || row.dataset.type === selectedType;
+            row.style.display = subjectMatch && typeMatch ? '' : 'none';
+        });
+    }
+
+    subjectFilter.addEventListener('change', filterTable);
+    typeFilter.addEventListener('change', filterTable);
+});
+</script>
+{% endblock %}
+
+{% endblock content %} 

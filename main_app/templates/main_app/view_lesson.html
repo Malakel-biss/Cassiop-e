@@ -1,0 +1,350 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/custom.css' %}"> <!-- 👈 Add this line -->
+<link rel="stylesheet" href="{% static 'css/adminlte.min.css' %}">
+
+{% block page_title %}Détails de la Leçon{% endblock page_title %}
+
+{% block content %}
+<div class="container py-4 align-items-stretch g-3">
+
+  <h2 class="mb-4">{{ lecon.name }}</h2>
+  <p class="text-muted mb-4"><strong>Description :</strong> {{ lecon.description }}</p>
+
+  <div class="row mb-4 align-items-stretch g-3">
+  <!-- 🎥 VIDEO COLUMN (wider, full height) -->
+  <div class="col-lg-7">
+    <div class="h-100 d-flex flex-column">
+      {% if lecon.video %}
+        <video class="w-100 rounded border" controls style="height: 100%; object-fit: cover;">
+          <source src="{{ lecon.video.url }}" type="video/mp4">
+          Votre navigateur ne supporte pas la lecture vidéo.
+        </video>
+      {% else %}
+        <p class="text-muted">Aucune vidéo disponible.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 🤖 CHATBOT COLUMN (slimmer, full height) -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm h-100 d-flex flex-column">
+      <div class="card-header bg-primary text-white">Assistant IA</div>
+      <div class="card-body d-flex flex-column p-0">
+        <!-- 💬 Chat messages -->
+        <div id="chat-log" class="flex-grow-1 p-3 overflow-auto" style="max-height: 400px; background: #f8f9fa;">
+          <!-- Chat messages inserted dynamically -->
+        </div>
+            
+  <div class="p-2 border-top bg-white d-flex align-items-center gap-2">
+    <input id="chat-input" class="form-control rounded-pill px-4 py-3 flex-grow-1" placeholder="Envoyer un message..." />
+    <button onclick="sendLessonChat()" class="btn btn-primary px-4 py-3 rounded-pill">Envoyer</button>
+    <button id="record-btn" class="btn btn-danger btn-lg px-4 fw-bold" 
+            onmousedown="startRecording()" 
+            onmouseup="stopRecording()">Record</button>
+  </div>
+
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border shadow-sm">
+        <div class="card-header">Document PDF</div>
+        <div class="card-body">
+          {% if lecon.pdf %}
+            <a href="{{ lecon.pdf.url }}" target="_blank" class="btn btn-outline-primary">📄 Télécharger</a>
+          {% else %}
+            <p class="text-muted">Aucun document disponible.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 d-flex flex-column gap-4">
+      <div class="card shadow-sm">
+        <div class="card-header">📝 Notes</div>
+        <div class="card-body">
+          <textarea class="form-control" rows="6" placeholder="Écrivez vos notes ici..."></textarea>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning">🎯 Quiz</div>
+        <div class="card-body">
+          <button class="btn btn-warning w-100 mb-3" onclick="generateQuiz()">Générer un Quiz</button>
+          <div id="quiz-output" class="d-flex flex-column gap-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+let recorder;
+let audioChunks = [];
+let quizQuestions = [];
+let currentQuestionIndex = 0;
+let quizStarted = false;
+let score = 0;
+
+
+function startRecording() {
+  console.log("🎙️ Starting recording...");
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    recorder = new MediaRecorder(stream);
+    audioChunks = [];
+    recorder.ondataavailable = e => {
+      console.log("📦 Audio data available:", e.data);
+      audioChunks.push(e.data);
+    };
+    recorder.onstop = sendRecordedVoice;
+    recorder.start();
+    document.getElementById('record-btn').innerText = "Recording...";
+  }).catch(err => {
+    console.error("Mic error:", err);
+    alert("Microphone inaccessible.");
+  });
+}
+
+function stopRecording() {
+  console.log("🛑 Stopping recording...");
+  if (recorder && recorder.state === "recording") {
+    recorder.stop();
+    document.getElementById('record-btn').innerText = "Record";
+  }
+}
+
+
+
+function toggleRecording() {
+  if (!recorder || recorder.state === "inactive") {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = e => audioChunks.push(e.data);
+      recorder.onstop = sendRecordedVoice;
+      audioChunks = [];
+      recorder.start();
+      document.getElementById('record-btn').innerText = "⏹️ Stop Recording";
+    });
+  } else {
+    recorder.stop();
+    document.getElementById('record-btn').innerText = "🎤 Enregistrer";
+  }
+}
+function sendRecordedVoice() {
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  const formData = new FormData();
+  formData.append("audio", blob, "voice.webm");
+
+  const chatLog = document.getElementById("chat-log");
+
+  // Ajout de la bulle utilisateur pour l'audio
+  const audioUrl = URL.createObjectURL(blob);
+  chatLog.innerHTML += `
+    <div class="d-flex justify-content-end mb-2">
+      <audio controls class="rounded" style="max-width: 70%;" src="${audioUrl}"></audio>
+    </div>
+  `;
+
+  // Bulle d'attente du bot
+  const botBubbleId = "bot-msg-" + Date.now();
+  chatLog.innerHTML += `
+    <div class="d-flex justify-content-start mb-2">
+      <div id="${botBubbleId}" class="bg-light border rounded p-2 px-3" style="max-width: 70%;">
+        <span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
+      </div>
+    </div>
+  `;
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  fetch("{% url 'lesson_chatbot' lecon.id %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    const bubble = document.getElementById(botBubbleId);
+    const answer = data.answer || "❌ Une erreur est survenue.";
+
+    bubble.innerHTML = "";
+    let i = 0;
+    function typeChar() {
+      if (i < answer.length) {
+        bubble.innerHTML += answer[i++];
+        chatLog.scrollTop = chatLog.scrollHeight;
+        setTimeout(typeChar, 18);
+      }
+    }
+    typeChar();
+
+    if (data.audio_url) {
+      const audioTag = document.createElement("audio");
+      audioTag.src = data.audio_url;
+      audioTag.controls = true;
+      audioTag.className = "mt-2 w-100 rounded";
+      bubble.appendChild(audioTag);
+    }
+  });
+}
+
+function sendLessonChat() {
+  const input = document.getElementById("chat-input");
+  const question = input.value.trim();
+  const chatLog = document.getElementById("chat-log");
+
+  if (!question) return;
+
+  // Add user message bubble
+  chatLog.innerHTML += `
+    <div class="d-flex justify-content-end mb-2">
+      <div class="bg-primary text-white rounded p-2 px-3" style="max-width: 70%;">${question}</div>
+    </div>
+  `;
+  input.value = "";
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  // Start bot bubble with typing dots
+  const botBubbleId = "bot-msg-" + Date.now();
+  chatLog.innerHTML += `
+    <div class="d-flex justify-content-start mb-2">
+      <div id="${botBubbleId}" class="bg-light border rounded p-2 px-3" style="max-width: 70%;">
+        <span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
+      </div>
+    </div>
+  `;
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  fetch("{% url 'lesson_chatbot' lecon.id %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({ question })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const answer = data.answer || "❌ Erreur de réponse.";
+    const bubble = document.getElementById(botBubbleId);
+    bubble.innerHTML = "";
+    let i = 0;
+    function typeChar() {
+      if (i < answer.length) {
+        bubble.innerHTML += answer[i++];
+        chatLog.scrollTop = chatLog.scrollHeight;
+        setTimeout(typeChar, 18); // typing speed
+      }
+    }
+    typeChar();
+  });
+}
+
+function readChatAloud() {
+  const audio = document.getElementById("tts-audio");
+  if (audio.src) audio.play();
+}
+
+function generateQuiz() {
+  score = 0;
+  const output = document.getElementById('quiz-output');
+  output.innerHTML = `<div class="text-muted">⏳ Génération du quiz...</div>`;
+
+  fetch("{% url 'generate_quiz' lecon.id %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": "{{ csrf_token }}" }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const nested = data.quiz?.quiz?.questions || data.quiz?.questions || [];
+    if (!nested.length) {
+      output.innerHTML = `<div class="text-danger">❌ Aucune question reçue.</div>`;
+      return;
+    }
+
+    quizQuestions = nested;
+    currentQuestionIndex = 0;
+    quizStarted = true;
+    showCurrentQuestion();
+  })
+  .catch(err => {
+    output.innerHTML = `<div class="text-danger">❌ Erreur lors de la génération.</div>`;
+    console.error(err);
+  });
+}
+
+function showCurrentQuestion() {
+  const output = document.getElementById('quiz-output');
+  const q = quizQuestions[currentQuestionIndex];
+
+  const optionsHtml = q.options.map((opt, i) => `
+    <button onclick="submitAnswer('${opt.replace(/'/g, "\\'")}')" class="btn btn-outline-primary w-100 text-start mb-2">${opt}</button>
+  `).join("");
+
+  output.innerHTML = `
+    <div class="card shadow-sm p-3">
+      <h6>Question ${currentQuestionIndex + 1} / ${quizQuestions.length}</h6>
+      <p class="fw-bold">${q.question}</p>
+      ${optionsHtml}
+      <div id="quiz-feedback" class="mt-3"></div>
+    </div>
+  `;
+}
+
+function resetQuiz() {
+  quizQuestions = [];
+  currentQuestionIndex = 0;
+  quizStarted = false;
+  score = 0;
+
+  document.getElementById('quiz-output').innerHTML = `
+    <div class="text-muted">Cliquez sur <strong>Générer un Quiz</strong> pour commencer.</div>
+  `;
+}
+
+function submitAnswer(selected) {
+  const q = quizQuestions[currentQuestionIndex];
+  const isCorrect = selected === q.answer;
+  const feedback = document.getElementById('quiz-feedback');
+
+  if (isCorrect) score++;
+
+  feedback.innerHTML = `
+    <div class="alert ${isCorrect ? 'alert-success' : 'alert-danger'}">
+      ${isCorrect ? "✅ Bonne réponse !" : `❌ Mauvaise réponse. La bonne était : <strong>${q.answer}</strong>`}
+    </div>
+    ${currentQuestionIndex + 1 < quizQuestions.length
+      ? `<button class="btn btn-secondary mt-2" onclick="nextQuestion()">Question Suivante →</button>`
+      : `
+        <div class="alert alert-success mt-2">
+          🎉 Quiz terminé !<br>
+          ✅ Score : <strong>${score} / ${quizQuestions.length}</strong>
+        </div>
+        <button class="btn btn-primary mt-2" onclick="resetQuiz()">↩️ Recommencer le Quiz</button>
+      `}
+  `;
+
+  // Disable only the answer buttons, not the next button
+  document.querySelectorAll("#quiz-output .quiz-option").forEach(btn => {
+    btn.disabled = true;
+  });
+}
+
+function nextQuestion() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < quizQuestions.length) {
+    showCurrentQuestion();
+  }
+}
+
+
+</script>
+{% endblock %}

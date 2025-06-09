@@ -1,0 +1,105 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}Soumission - {{ submission.assignment.title }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Soumission - {{ submission.assignment.title }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="submission-info mb-4">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Matière:</strong> {{ submission.assignment.subject.name }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Type:</strong> {{ submission.assignment.get_assignment_type_display }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Date de soumission:</strong> {{ submission.submitted_at|date:"d/m/Y H:i" }}
+                                </div>
+                            </div>
+                            
+                            {% if submission.is_late %}
+                            <div class="alert alert-danger mt-3">
+                                Cette soumission a été effectuée après la date limite.
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if submission.assignment.assignment_type == 'quiz' %}
+                        <div class="questions-section">
+                            {% for answer in submission.answers.all %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5>Question {{ forloop.counter }}</h5>
+                                    <p>{{ answer.question.question_text }}</p>
+                                    
+                                    <div class="form-group">
+                                        <label>Votre réponse:</label>
+                                        <p class="form-control-static">{{ answer.answer_text }}</p>
+                                    </div>
+                                    
+                                    {% if answer.is_correct is not None %}
+                                    <div class="form-group">
+                                        <label>Statut:</label>
+                                        <span class="badge {% if answer.is_correct %}badge-success{% else %}badge-danger{% endif %}">
+                                            {% if answer.is_correct %}Correct{% else %}Incorrect{% endif %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="form-group">
+                            <label>Fichier soumis:</label>
+                            {% if submission.file %}
+                            <p>
+                                <a href="{{ submission.file.url }}" target="_blank" class="btn btn-info">
+                                    <i class="fas fa-download"></i> Télécharger le fichier
+                                </a>
+                            </p>
+                            {% else %}
+                            <p class="text-muted">Aucun fichier soumis</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if submission.score is not None %}
+                        <div class="grade-section mt-4">
+                            <h4>Note et Feedback</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Note:</strong> {{ submission.score }}/20
+                                </div>
+                                {% if submission.feedback %}
+                                <div class="col-md-12 mt-3">
+                                    <strong>Feedback:</strong>
+                                    <p>{{ submission.feedback }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info mt-4">
+                            Votre soumission est en cours d'évaluation.
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-group mt-4">
+                            <a href="{% url 'student_assignments' %}" class="btn btn-default">Retour</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

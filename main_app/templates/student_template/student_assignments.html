@@ -1,0 +1,86 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block page_title %}Quiz et Devoirs{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Quiz et Devoirs</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Matière</th>
+                                        <th>Type</th>
+                                        <th>Date limite</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in assignments %}
+                                    <tr>
+                                        <td>{{ assignment.title }}</td>
+                                        <td>{{ assignment.subject.name }}</td>
+                                        <td>
+                                            <span class="badge {% if assignment.assignment_type == 'quiz' %}badge-info{% else %}badge-warning{% endif %}">
+                                                {{ assignment.get_assignment_type_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ assignment.due_date|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            {% with submission=submission_dict|get_item:assignment.id %}
+                                            {% if submission %}
+                                            <span class="badge badge-success">Soumis</span>
+                                            {% else %}
+                                            <span class="badge badge-danger">Non soumis</span>
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            {% with submission=submission_dict|get_item:assignment.id %}
+                                            {% if submission %}
+                                            <a href="{% url 'student_view_submission' submission.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> Voir la soumission
+                                            </a>
+                                            {% else %}
+                                            <a href="{% url 'student_view_assignment' assignment.id %}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i> Commencer
+                                            </a>
+                                            {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">Aucun quiz ou devoir disponible</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

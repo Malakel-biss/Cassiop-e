@@ -1,0 +1,96 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <a href="{% url 'student_compose_message' %}" class="btn btn-primary btn-block mb-3">
+                    <i class="fas fa-edit"></i> Nouveau message
+                </a>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Dossiers</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item">
+                                <a href="{% url 'student_inbox' %}" class="nav-link active">
+                                    <i class="fas fa-inbox"></i> Boîte de réception
+                                    {% with unread_count=messages|dictsortreversed:"is_read"|first %}
+                                    {% if unread_count %}
+                                    <span class="badge bg-primary float-right">{{ messages|dictsortreversed:"is_read"|length }}</span>
+                                    {% endif %}
+                                    {% endwith %}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'student_sent_messages' %}" class="nav-link">
+                                    <i class="fas fa-envelope"></i> Messages envoyés
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Boîte de réception</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if messages %}
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Statut</th>
+                                        <th>Expéditeur</th>
+                                        <th>Objet</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for message in messages %}
+                                    <tr class="{% if not message.is_read %}font-weight-bold{% endif %}">
+                                        <td>
+                                            {% if message.is_read %}
+                                            <i class="fas fa-envelope-open text-muted"></i>
+                                            {% else %}
+                                            <i class="fas fa-envelope text-primary"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ message.sender.first_name }} {{ message.sender.last_name }}</td>
+                                        <td>
+                                            <a href="{% url 'student_view_message' message.id %}">
+                                                {{ message.subject }}
+                                            </a>
+                                        </td>
+                                        <td>{{ message.created_at|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'student_view_message' message.id %}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info m-3">
+                            Aucun message dans votre boîte de réception.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %} 

@@ -1,0 +1,1082 @@
+[
+  {
+    "start": 0.0,
+    "end": 7.0,
+    "text": "Bonjour tout le monde, c'est Morgan, vous assurez l'algorithme pour la formation sur les algorithmes de machine learning linéaire."
+  },
+  {
+    "start": 7.0,
+    "end": 15.0,
+    "text": "Si vous aimez cette série de vidéos, abonnez-vous et aimez la vidéo faire rionner toujours plus largement ces contenus."
+  },
+  {
+    "start": 15.0,
+    "end": 19.0,
+    "text": "Dans cette vidéo, vous allez découvrir toute la théorie sur la régulation linéaire."
+  },
+  {
+    "start": 19.0,
+    "end": 29.0,
+    "text": "Vous allez découvrir tout sur son fonctionnement, comment les heureux récalculer et comment les paramètres sont optimisés grâce à l'algorithme du gradient descent."
+  },
+  {
+    "start": 29.0,
+    "end": 41.0,
+    "text": "Sachez que vous pouvez retrouver tous les documents de cette formation via un lien directement dans la description ou sur le site AIFORU.fr avec une version online de la formation."
+  },
+  {
+    "start": 41.0,
+    "end": 43.0,
+    "text": "Maintenant, laissez-go !"
+  },
+  {
+    "start": 43.0,
+    "end": 50.0,
+    "text": "La régression linéaire est un algorithme de machine learning permettant de résoudre des problèmes de régression."
+  },
+  {
+    "start": 50.0,
+    "end": 56.0,
+    "text": "Un problème de régression est un problème d'apprentissage supervisé où l'on prédit une variable continue."
+  },
+  {
+    "start": 56.0,
+    "end": 65.0,
+    "text": "Dans notre exemple, nous allons prédire le prix d'une maison qui est une variable continue car elle peut prendre n'importe quel valeur entre zéro et plus l'infini."
+  },
+  {
+    "start": 65.0,
+    "end": 75.0,
+    "text": "Nous avons, en notre disposition, un jeu de données labellisé avec des variables explicatives X qui nous donne des informations sur le problème que nous essayons de résoudre."
+  },
+  {
+    "start": 75.0,
+    "end": 79.0,
+    "text": "Ici, on a la surface de la maison, son nombre de pièces et l'année de construction."
+  },
+  {
+    "start": 79.0,
+    "end": 85.0,
+    "text": "On a également la variable Y qui est notre variable cible qui correspond au prix de chaque maison."
+  },
+  {
+    "start": 85.0,
+    "end": 96.0,
+    "text": "L'idée est de créer un modèle qui prend en montrer les variables explicatives et qui arrivent en fonction de ces données à prédire le prix des maisons et notre variable Y."
+  },
+  {
+    "start": 96.0,
+    "end": 107.0,
+    "text": "Pour la suite de notre exemple, nous allons seulement utiliser la variable explicative sur face pour prédire le prix de notre maison afin de simplifier le problème pour mieux visualiser et mieux le comprendre."
+  },
+  {
+    "start": 107.0,
+    "end": 112.0,
+    "text": "On va commencer par visualiser notre problème. Nous avons, en appétit, la surface de notre maison et en ordonné le prix de cette maison."
+  },
+  {
+    "start": 112.0,
+    "end": 116.0,
+    "text": "Chaque point bleu correspond à l'association de la surface et du prix pour chaque maison."
+  },
+  {
+    "start": 116.0,
+    "end": 119.0,
+    "text": "On peut remarquer une tendance à l'augmentation du prix lorsque la surface augmente."
+  },
+  {
+    "start": 119.0,
+    "end": 123.16,
+    "text": "et mieux le comprendre. On va commencer par visualiser notre problème. Nous avons"
+  },
+  {
+    "start": 123.16,
+    "end": 127.64,
+    "text": "un appétit de la surface de notre maison et en ordonné le prix de cette maison."
+  },
+  {
+    "start": 127.64,
+    "end": 132.52,
+    "text": "Chaque point bleu correspond à l'association de la surface et du prix pour chaque maison."
+  },
+  {
+    "start": 132.52,
+    "end": 137.44,
+    "text": "On peut remarquer une tendance à l'augmentation du prix lorsque la surface augmente."
+  },
+  {
+    "start": 137.44,
+    "end": 141.48,
+    "text": "On pourrait modéliser l'interaction entre se deux variables entre assants une droite."
+  },
+  {
+    "start": 141.48,
+    "end": 146.48,
+    "text": "Comme cela, si j'ai une nouvelle maison avec une surface de 45m par exemple,"
+  },
+  {
+    "start": 146.48,
+    "end": 150.32,
+    "text": "je peux utiliser cette droite pour présire le prix de cette maison."
+  },
+  {
+    "start": 150.32,
+    "end": 154.51999999999998,
+    "text": "L'expression mathématique de cette fonction est celle d'une droite."
+  },
+  {
+    "start": 154.51999999999998,
+    "end": 162.56,
+    "text": "On a bien Y, Y, Y, Y, X, Y. Vous avez déjà vu cette équation en terminale"
+  },
+  {
+    "start": 162.56,
+    "end": 167.12,
+    "text": "lorsque vous étudiez les fonctions à fine. Vous avez déjà vu cette forme, F, D, X,"
+  },
+  {
+    "start": 167.12,
+    "end": 172.28,
+    "text": "Y, A, X plus B. La fonction reste la même. Les changements sont seulement"
+  },
+  {
+    "start": 172.28,
+    "end": 178.16,
+    "text": "du à des conventions différentes. Ici, W0 est égal à B qui est notre ordonné à l'origine"
+  },
+  {
+    "start": 178.16,
+    "end": 183.64,
+    "text": "et A est égal à W1 qui est le coefficient appliqué à notre variable X1."
+  },
+  {
+    "start": 183.64,
+    "end": 188.84,
+    "text": "Ici, nous sommes dans le cas où on utilise seulement une variable explicative X1 pour résoudre"
+  },
+  {
+    "start": 188.84,
+    "end": 194.04,
+    "text": "notre problème. Mais dans le cas général, on peut avoir autant de variables explicatives"
+  },
+  {
+    "start": 194.04,
+    "end": 197.52,
+    "text": "que l'on veut. Donc voici l'expression de notre modèle dans le cas général."
+  },
+  {
+    "start": 197.52,
+    "end": 202.92000000000002,
+    "text": "Ici, on a W2 qui est le coefficient appliqué à une seconde variable X2 et ainsi"
+  },
+  {
+    "start": 202.92000000000002,
+    "end": 207.16000000000003,
+    "text": "de suite jusqu'à WN qui est le coefficient appliqué à la variable XN."
+  },
+  {
+    "start": 207.16000000000003,
+    "end": 212.56,
+    "text": "Revenons à notre exemple avec une seule variable et avec deux paramètres W0 qui est"
+  },
+  {
+    "start": 212.56,
+    "end": 217.0,
+    "text": "lors de nels origines et W1 qui est le coefficient directeur de notre droite."
+  },
+  {
+    "start": 217.0,
+    "end": 221.52,
+    "text": "Pour une valeur de W0 et W1, on peut obtenir une droite."
+  },
+  {
+    "start": 221.52,
+    "end": 227.0,
+    "text": "Mais si on change les valeurs, on change également la représentation de cette droite."
+  },
+  {
+    "start": 227.08,
+    "end": 230.64,
+    "text": "Pour résoudre notre problème, un exemple, qu'elle paramètre devant nous choisir."
+  },
+  {
+    "start": 230.64,
+    "end": 235.32,
+    "text": "On peut choisir une infimidienne paramètre qui nous donne une infinité de droite qui passera"
+  },
+  {
+    "start": 235.32,
+    "end": 240.04,
+    "text": "par nos points. Pour nous aider à choisir les paramètres qui sont les meilleurs pour notre modèle,"
+  },
+  {
+    "start": 240.04,
+    "end": 244.24,
+    "text": "nous allons intégrer une nouvelle notion, la notion d'erreurs et de coups."
+  },
+  {
+    "start": 244.24,
+    "end": 248.4,
+    "text": "Imaginons que j'ai décidé de prendre des paramètres qui me donnent cette droite."
+  },
+  {
+    "start": 248.4,
+    "end": 252.72,
+    "text": "À partir de cette droite, on peut calculer l'erreur de prédiction."
+  },
+  {
+    "start": 252.72,
+    "end": 256.8,
+    "text": "Cette erreur est la distance entre le prix réel de la maison donnée par notre point bleu"
+  },
+  {
+    "start": 256.8,
+    "end": 260.04,
+    "text": "et le prix de la maison estimé par notre droite rouge."
+  },
+  {
+    "start": 260.04,
+    "end": 263.36,
+    "text": "Cette distance est l'erreur de prédiction de notre droite."
+  },
+  {
+    "start": 263.36,
+    "end": 266.40000000000003,
+    "text": "On va calculer cette erreur pour chacun de nos exemples."
+  },
+  {
+    "start": 266.40000000000003,
+    "end": 270.72,
+    "text": "Si je reprends mon problème et que je trace une nouvelle droite,"
+  },
+  {
+    "start": 270.72,
+    "end": 275.16,
+    "text": "je peux visualiser un nouveau mes erreurs par rapport à cette droite"
+  },
+  {
+    "start": 275.16,
+    "end": 280.04,
+    "text": "et on peut voir que l'erreur a l'air moins importante que précédemment."
+  },
+  {
+    "start": 280.04,
+    "end": 284.8,
+    "text": "Donc l'objectif est de trouver une droite qui minimise cette erreur de prédiction."
+  },
+  {
+    "start": 284.8,
+    "end": 289.48,
+    "text": "Nous arrivons à continuer visuellement l'erreur de prédiction de la droite"
+  },
+  {
+    "start": 289.48,
+    "end": 293.28000000000003,
+    "text": "car nous avons qu'une variable explicative est très peu de point."
+  },
+  {
+    "start": 293.28000000000003,
+    "end": 297.88,
+    "text": "L'idée est de trouver une fonction qui estime l'erreur de prédiction de notre modèle."
+  },
+  {
+    "start": 297.88,
+    "end": 301.32,
+    "text": "Cette fonction se nomme la fonction de coup car elle calcule le coup,"
+  },
+  {
+    "start": 301.32,
+    "end": 303.36,
+    "text": "c'est-à-dire l'erreur de notre modèle."
+  },
+  {
+    "start": 303.36,
+    "end": 307.28000000000003,
+    "text": "Par défaut, on pourrait dire que l'on calcule la distance entre y capot"
+  },
+  {
+    "start": 307.28000000000003,
+    "end": 311.92,
+    "text": "qui est l'estimation de notre modèle et y qui est la valeur réelle."
+  },
+  {
+    "start": 311.92,
+    "end": 315.2,
+    "text": "Pour le reste, ils ont seulement à sommer les erreurs"
+  },
+  {
+    "start": 315.2,
+    "end": 319.44,
+    "text": "et à le diviser par le nombre d'exemples et on aurait une erreur moyenne."
+  },
+  {
+    "start": 319.44,
+    "end": 323.8,
+    "text": "L'imagine donc que notre modèle prédise un prix d'appartement de 500 euros."
+  },
+  {
+    "start": 323.8,
+    "end": 326.6,
+    "text": "Alors que la valeur réelle est de 550."
+  },
+  {
+    "start": 326.6,
+    "end": 328.72,
+    "text": "La différence serait de moins 20."
+  },
+  {
+    "start": 328.72,
+    "end": 332.68,
+    "text": "Pour mon seconde exemple, le modèle a fait une prédiction de 350."
+  },
+  {
+    "start": 332.68,
+    "end": 336.16,
+    "text": "Alors que la valeur réelle est de 320."
+  },
+  {
+    "start": 336.16,
+    "end": 338.16,
+    "text": "La différence serait de 30."
+  },
+  {
+    "start": 338.20000000000005,
+    "end": 342.20000000000005,
+    "text": "Si on somme, c'est de valeur, on obtient une erreur moyenne de 5."
+  },
+  {
+    "start": 342.20000000000005,
+    "end": 343.20000000000005,
+    "text": "Ce qui est faux."
+  },
+  {
+    "start": 343.20000000000005,
+    "end": 345.96000000000004,
+    "text": "Pour éviter cette erreur, on va mettre les erreurs au carré,"
+  },
+  {
+    "start": 345.96000000000004,
+    "end": 347.8,
+    "text": "afin que toutes les erreurs soient positives."
+  },
+  {
+    "start": 347.8,
+    "end": 353.84000000000003,
+    "text": "Dans cette manière, ils ne vont plus s'annuler en train et nous pouvons sommer nos erreurs sans problème."
+  },
+  {
+    "start": 353.84000000000003,
+    "end": 355.88,
+    "text": "Maintenant, nous avons notre fonction de coup,"
+  },
+  {
+    "start": 355.88,
+    "end": 359.68,
+    "text": "mais nous avons toujours pas comment choisir les différents paramètres de notre modèle."
+  },
+  {
+    "start": 359.68,
+    "end": 363.76000000000005,
+    "text": "Ce que l'on peut faire, c'est tester différents modèles, calculer les erreurs associés"
+  },
+  {
+    "start": 363.76000000000005,
+    "end": 366.40000000000003,
+    "text": "et choisir le modèle avec le moins d'erreurs."
+  },
+  {
+    "start": 366.44000000000005,
+    "end": 370.92,
+    "text": "On va essayer à le trouver les meilleures paramètres pour résoudre un problème ici avec nos trois exemples."
+  },
+  {
+    "start": 370.92,
+    "end": 373.92,
+    "text": "Je rappelle l'expression mathématique de notre modèle,"
+  },
+  {
+    "start": 373.92,
+    "end": 376.84000000000003,
+    "text": "dans cet exemple, W0 sera fixé à 0"
+  },
+  {
+    "start": 376.84000000000003,
+    "end": 380.56000000000006,
+    "text": "et nous allons optimiser uniquement le coefficient W1."
+  },
+  {
+    "start": 380.56000000000006,
+    "end": 382.8,
+    "text": "Nous allons également tracer un deuxième graphique,"
+  },
+  {
+    "start": 382.8,
+    "end": 387.16,
+    "text": "la fonction de coup, GW, en fonction des différentes valeurs de W1."
+  },
+  {
+    "start": 387.16,
+    "end": 391.28000000000003,
+    "text": "A chaque valeur de W1 sera associée une valeur de coup différente."
+  },
+  {
+    "start": 391.28000000000003,
+    "end": 394.40000000000003,
+    "text": "Je rappelle l'expression mathématique de notre fonction de coup."
+  },
+  {
+    "start": 394.44000000000005,
+    "end": 397.16,
+    "text": "On commence à W1, égal à 0."
+  },
+  {
+    "start": 397.16,
+    "end": 399.84000000000003,
+    "text": "Ce qui correspond à cette représentation graphique."
+  },
+  {
+    "start": 399.84000000000003,
+    "end": 403.24,
+    "text": "On visualise le coup, puis on le calcule."
+  },
+  {
+    "start": 403.24,
+    "end": 408.44000000000005,
+    "text": "On reporte le coup associé à la valeur 0 de W1 sur le graphique de coup."
+  },
+  {
+    "start": 408.44000000000005,
+    "end": 411.32000000000005,
+    "text": "On va tester pour W1, égal à 05."
+  },
+  {
+    "start": 411.32000000000005,
+    "end": 414.44000000000005,
+    "text": "La fonction sera proche de nos exemples, mais il y a toujours de l'erreur."
+  },
+  {
+    "start": 414.44000000000005,
+    "end": 417.52000000000004,
+    "text": "Et l'erreur est estimé à 068."
+  },
+  {
+    "start": 417.52000000000004,
+    "end": 419.88000000000005,
+    "text": "On peut le reporter également sur notre graphique."
+  },
+  {
+    "start": 419.88000000000005,
+    "end": 422.56000000000006,
+    "text": "On peut tester également W1, égal à 1."
+  },
+  {
+    "start": 422.6,
+    "end": 425.16,
+    "text": "Ici, on remarque que le modèle est parfait."
+  },
+  {
+    "start": 425.16,
+    "end": 427.08,
+    "text": "Effectivement, le coup est égal à 0."
+  },
+  {
+    "start": 427.08,
+    "end": 429.4,
+    "text": "On peut le reporter également sur notre graphique."
+  },
+  {
+    "start": 429.4,
+    "end": 433.04,
+    "text": "On peut continuer au test pour W1, égal à 1,5 et 2."
+  },
+  {
+    "start": 433.04,
+    "end": 438.32,
+    "text": "Si on reline au point, on obtient une estimation de la distribution de l'erreur"
+  },
+  {
+    "start": 438.32,
+    "end": 441.0,
+    "text": "en fonction des différentes valeurs de W1."
+  },
+  {
+    "start": 441.0,
+    "end": 445.2,
+    "text": "On peut voir que pour W1, égal à 1, l'erreur est au minimum."
+  },
+  {
+    "start": 445.2,
+    "end": 451.16,
+    "text": "Notre modèle aura donc pour paramètres W0, égal à 0 et W1, égal à 1."
+  },
+  {
+    "start": 451.20000000000005,
+    "end": 455.20000000000005,
+    "text": "On peut faire la même chose en faisant un varié W1 et W0 en même temps."
+  },
+  {
+    "start": 455.20000000000005,
+    "end": 459.84000000000003,
+    "text": "Mais pour tracer le coup en fonction des différentes valeurs de W0 et W1,"
+  },
+  {
+    "start": 459.84000000000003,
+    "end": 462.20000000000005,
+    "text": "il nous faudrait un graphique en trois dimensions."
+  },
+  {
+    "start": 462.20000000000005,
+    "end": 464.44000000000005,
+    "text": "Ici, on a ajouté une nouvelle variable."
+  },
+  {
+    "start": 464.44000000000005,
+    "end": 467.64000000000004,
+    "text": "Ce ne serait alors plus possible de visualiser notre coup"
+  },
+  {
+    "start": 467.64000000000004,
+    "end": 470.12,
+    "text": "en fonction des différentes valeurs de nos paramètres"
+  },
+  {
+    "start": 470.12,
+    "end": 472.68,
+    "text": "parce qu'on aurait dépassé les trois dimensions."
+  },
+  {
+    "start": 472.68,
+    "end": 475.44000000000005,
+    "text": "De plus, pour obtenir ces cas de coup,"
+  },
+  {
+    "start": 475.44000000000005,
+    "end": 478.28000000000003,
+    "text": "on est obligé de tester toutes les valeurs possibles"
+  },
+  {
+    "start": 478.32000000000005,
+    "end": 481.56,
+    "text": "pour nos paramètres, ce qui est très long en temps de calcul."
+  },
+  {
+    "start": 481.56,
+    "end": 484.40000000000003,
+    "text": "On va donc essayer de trouver de manière analytique"
+  },
+  {
+    "start": 484.40000000000003,
+    "end": 489.08000000000004,
+    "text": "de résoudre notre problème en utilisant l'algorithme de la descente du gradient."
+  },
+  {
+    "start": 489.08000000000004,
+    "end": 491.16,
+    "text": "En France, on appelle descente de gradient,"
+  },
+  {
+    "start": 491.16,
+    "end": 494.04,
+    "text": "mais on va plus souvent appeler cette algorithme sous son nom anglais,"
+  },
+  {
+    "start": 494.04,
+    "end": 495.56000000000006,
+    "text": "le gradient descente."
+  },
+  {
+    "start": 495.56000000000006,
+    "end": 497.8,
+    "text": "Donc, désolé, je fais un peu d'angle seismici."
+  },
+  {
+    "start": 497.8,
+    "end": 500.16,
+    "text": "Donc, soit N, le nombre de variables,"
+  },
+  {
+    "start": 500.16,
+    "end": 505.20000000000005,
+    "text": "on aura des paramètres tout le VG qui seront entre 1 et N."
+  },
+  {
+    "start": 505.20000000000005,
+    "end": 508.12,
+    "text": "Le objectif va être de trouver une fonction"
+  },
+  {
+    "start": 508.12,
+    "end": 510.48,
+    "text": "qui modifira les paramètres WG,"
+  },
+  {
+    "start": 510.48,
+    "end": 513.6,
+    "text": "afin qu'ils minimisent la fonction de coup GW."
+  },
+  {
+    "start": 513.6,
+    "end": 516.48,
+    "text": "On utilise donc la formule que vous voyez à l'écran."
+  },
+  {
+    "start": 516.48,
+    "end": 518.68,
+    "text": "Le deux points égal correspond à l'affectation,"
+  },
+  {
+    "start": 518.68,
+    "end": 523.2,
+    "text": "ça veut dire que la valeur WG sera remplacée par le résultat"
+  },
+  {
+    "start": 523.2,
+    "end": 524.84,
+    "text": "de notre expression à droite."
+  },
+  {
+    "start": 524.84,
+    "end": 528.0,
+    "text": "L'expression est découpée en trois termes différents."
+  },
+  {
+    "start": 528.0,
+    "end": 531.52,
+    "text": "En premier, on a l'ancienne valeur de WG,"
+  },
+  {
+    "start": 531.52,
+    "end": 534.72,
+    "text": "à laquelle on va soustraire la suite de l'expression."
+  },
+  {
+    "start": 534.72,
+    "end": 538.04,
+    "text": "On a le learning rate, donc désolé encore un peu d'angle seism,"
+  },
+  {
+    "start": 538.04,
+    "end": 540.16,
+    "text": "la traduction est au d'apprentissage,"
+  },
+  {
+    "start": 540.16,
+    "end": 541.64,
+    "text": "et vous le verrez nulle part,"
+  },
+  {
+    "start": 541.64,
+    "end": 544.12,
+    "text": "donc autant apprendre les noms utiles,"
+  },
+  {
+    "start": 544.12,
+    "end": 547.76,
+    "text": "donc le learning rate est un nombre entre 0 et 1,"
+  },
+  {
+    "start": 547.76,
+    "end": 551.28,
+    "text": "qui permet de contrôler la mise à jour des paramètres WG."
+  },
+  {
+    "start": 551.28,
+    "end": 554.4,
+    "text": "Le dernier terme est la dérivée partielle de GW,"
+  },
+  {
+    "start": 554.4,
+    "end": 557.64,
+    "text": "par rapport aux paramètres que l'on souhaite mettre à jour WG."
+  },
+  {
+    "start": 557.64,
+    "end": 561.68,
+    "text": "Le objectif sera de commencer avec des valeurs de WG à l'éatoir"
+  },
+  {
+    "start": 561.68,
+    "end": 563.56,
+    "text": "et de les changer au fil du temps,"
+  },
+  {
+    "start": 563.56,
+    "end": 565.76,
+    "text": "afin d'obtenir des valeurs de WG,"
+  },
+  {
+    "start": 565.76,
+    "end": 568.3199999999999,
+    "text": "minimisant la fonction de coût GW."
+  },
+  {
+    "start": 568.3199999999999,
+    "end": 570.84,
+    "text": "Pour le moment, ça peut vous paraître un peu abstrait,"
+  },
+  {
+    "start": 570.84,
+    "end": 573.64,
+    "text": "mais vous allez voir qu'au fil de l'exemple que je vais vous montrer après,"
+  },
+  {
+    "start": 573.64,
+    "end": 575.28,
+    "text": "ça ira de mieux en mieux."
+  },
+  {
+    "start": 575.28,
+    "end": 577.72,
+    "text": "Reprenons la cours tracée précédemment,"
+  },
+  {
+    "start": 577.72,
+    "end": 579.84,
+    "text": "GW en fonction de W1."
+  },
+  {
+    "start": 579.84,
+    "end": 581.88,
+    "text": "Commence donc en T0,"
+  },
+  {
+    "start": 581.88,
+    "end": 584.16,
+    "text": "avec un paramètre W1 à l'éatoir,"
+  },
+  {
+    "start": 584.16,
+    "end": 586.96,
+    "text": "en calcul l'erreur de prédiction de notre jeu de données"
+  },
+  {
+    "start": 586.96,
+    "end": 588.92,
+    "text": "et en obtient son coût associé."
+  },
+  {
+    "start": 588.92,
+    "end": 591.68,
+    "text": "On applique maintenant l'expression du gradient d'essence"
+  },
+  {
+    "start": 591.68,
+    "end": 595.0,
+    "text": "pour obtenir la nouvelle valeur de W1 à T1."
+  },
+  {
+    "start": 595.0,
+    "end": 598.8,
+    "text": "Il faut donc déterminer la valeur de la dérivée partielle"
+  },
+  {
+    "start": 598.8,
+    "end": 601.32,
+    "text": "si vous souvez bien de vos cours de maths du lycée."
+  },
+  {
+    "start": 601.32,
+    "end": 603.4,
+    "text": "La valeur d'une dérivée en un point"
+  },
+  {
+    "start": 603.4,
+    "end": 607.72,
+    "text": "est égale à la valeur du coût officiant directeur de la tangente en ce point."
+  },
+  {
+    "start": 607.72,
+    "end": 611.48,
+    "text": "Ici, on a le coût officiant directeur d'une droite croissante."
+  },
+  {
+    "start": 611.48,
+    "end": 614.36,
+    "text": "Donc la valeur de la dérivée partielle est un nombre positif."
+  },
+  {
+    "start": 614.36,
+    "end": 617.16,
+    "text": "Learning rate est un nombre entre 0 et 1,"
+  },
+  {
+    "start": 617.16,
+    "end": 618.56,
+    "text": "donc c'est un nombre positif."
+  },
+  {
+    "start": 618.56,
+    "end": 622.96,
+    "text": "Donc une multiplication entre de nombre positif donne encore un nombre positif."
+  },
+  {
+    "start": 623.0,
+    "end": 627.5600000000001,
+    "text": "Si l'on soustrait W1 à un nombre positif, on entiendra en T1"
+  },
+  {
+    "start": 627.5600000000001,
+    "end": 630.1600000000001,
+    "text": "une valeur de W1 plus petite quant est 0."
+  },
+  {
+    "start": 630.1600000000001,
+    "end": 632.5600000000001,
+    "text": "Si on prend cette nouvelle valeur de W1"
+  },
+  {
+    "start": 632.5600000000001,
+    "end": 635.12,
+    "text": "et que l'on calcule le coût associé,"
+  },
+  {
+    "start": 635.12,
+    "end": 638.44,
+    "text": "on remarque que le coût associé est plus faible que précédemment."
+  },
+  {
+    "start": 638.44,
+    "end": 639.76,
+    "text": "Maintenant, on vous allez me dire,"
+  },
+  {
+    "start": 639.76,
+    "end": 644.24,
+    "text": "mais si la valeur de W1 à T0 initialisée se trouve de l'autre côté de la pente,"
+  },
+  {
+    "start": 644.24,
+    "end": 646.1600000000001,
+    "text": "est-ce que l'on va remonter la pente?"
+  },
+  {
+    "start": 646.1600000000001,
+    "end": 647.84,
+    "text": "Eh bien, on va voir que ça ne change rien."
+  },
+  {
+    "start": 647.84,
+    "end": 649.24,
+    "text": "Nous allons le voir avec cet exemple,"
+  },
+  {
+    "start": 649.24,
+    "end": 651.88,
+    "text": "où on prend une valeur de W1 proche de 0"
+  },
+  {
+    "start": 651.88,
+    "end": 654.16,
+    "text": "avec un coût associé proche de 2,3."
+  },
+  {
+    "start": 654.16,
+    "end": 656.76,
+    "text": "Nous allons appliquer l'algorithme du radien de descents."
+  },
+  {
+    "start": 656.76,
+    "end": 659.04,
+    "text": "On va calculer la valeur de la dérivé partielle."
+  },
+  {
+    "start": 659.04,
+    "end": 664.0,
+    "text": "La valeur de la dérivé partielle est également la valeur du coût efficient directeur de sa tangente en ce point."
+  },
+  {
+    "start": 664.0,
+    "end": 667.28,
+    "text": "Ici, on voit que la droite, donc la tangente est décroissante."
+  },
+  {
+    "start": 667.28,
+    "end": 670.36,
+    "text": "Donc la valeur de la dérivé partielle sera négative."
+  },
+  {
+    "start": 670.36,
+    "end": 672.28,
+    "text": "Learning rate reste positif."
+  },
+  {
+    "start": 672.28,
+    "end": 677.04,
+    "text": "Donc la multiplication entre un nombre négatif et positif donne une valeur négative."
+  },
+  {
+    "start": 677.04,
+    "end": 679.36,
+    "text": "Et si on soustrait un nombre négatif,"
+  },
+  {
+    "start": 679.4,
+    "end": 682.76,
+    "text": "ça revient à additionner la valeur à l'expression W1."
+  },
+  {
+    "start": 682.76,
+    "end": 688.4,
+    "text": "Donc la nouvelle valeur de W1 en T1 sera donc plus grande que l'ancienne valeur en T0."
+  },
+  {
+    "start": 688.4,
+    "end": 691.32,
+    "text": "On a donc notre nouvelle valeur W1 en T1."
+  },
+  {
+    "start": 691.32,
+    "end": 694.32,
+    "text": "Cette valeur est associée à un coût plus faible que précédemment."
+  },
+  {
+    "start": 694.32,
+    "end": 697.84,
+    "text": "L'objectif est de réitérer l'application du radien de descents"
+  },
+  {
+    "start": 697.84,
+    "end": 701.72,
+    "text": "jusqu'à faire converger notre modèle vers une erre minimum."
+  },
+  {
+    "start": 701.72,
+    "end": 706.88,
+    "text": "Pour atteindre le minimum, on ne peut pas compter sur le learning rate qui reste fixe."
+  },
+  {
+    "start": 706.92,
+    "end": 713.24,
+    "text": "Il faut donc compter sur la dérivé partielle qui va diminuer au fur et à mesure qu'on l'approche du minimum."
+  },
+  {
+    "start": 713.24,
+    "end": 718.4399999999999,
+    "text": "Souvenez-vous que la dérivé partielle est égale à la valeur du coût si un directeur de la tangente en ce point."
+  },
+  {
+    "start": 718.4399999999999,
+    "end": 723.32,
+    "text": "On peut donc voir que plus on se rapproche du minimum plus la pente diminue."
+  },
+  {
+    "start": 723.32,
+    "end": 725.52,
+    "text": "Donc plus la dérivé partielle sera petite."
+  },
+  {
+    "start": 725.52,
+    "end": 731.76,
+    "text": "Jusqu'à atteindre le minimum, on a une droite uniforme et le coût si un directeur d'une droite uniforme est de 0."
+  },
+  {
+    "start": 731.76,
+    "end": 734.6,
+    "text": "Donc le paramètre W1 ne sera plus mis à jour."
+  },
+  {
+    "start": 734.6,
+    "end": 738.8000000000001,
+    "text": "La valeur de la dérivé partielle aura tendance donc à diminuer à la proche du minimum,"
+  },
+  {
+    "start": 738.8000000000001,
+    "end": 744.52,
+    "text": "ce qui rendra le pas de plus en plus petit jusqu'à atteindre le minimum global de notre fonction coût et GW."
+  },
+  {
+    "start": 744.52,
+    "end": 750.44,
+    "text": "Maintenant que l'on comprend bien, le terme de la dérié partielle passons à l'utilité et l'impact du learning rate."
+  },
+  {
+    "start": 750.44,
+    "end": 755.64,
+    "text": "La valeur d'une learning rate est constant dans tout l'entraînement et il est compris entre 0 et 1."
+  },
+  {
+    "start": 755.64,
+    "end": 759.0,
+    "text": "Le rôle du learning rate est de contrôler la mise à jour des poids."
+  },
+  {
+    "start": 759.0,
+    "end": 762.4,
+    "text": "S'il n'y a pas de learning rate aussi la valeur du learning rate est trop grande,"
+  },
+  {
+    "start": 762.4,
+    "end": 767.48,
+    "text": "le modèle peut avoir des difficultés à converger et même parfois diverger."
+  },
+  {
+    "start": 767.48,
+    "end": 772.72,
+    "text": "Si la valeur d'une learning rate est trop petite, la convergence peut être très lance et l'entraînement"
+  },
+  {
+    "start": 772.72,
+    "end": 774.9599999999999,
+    "text": "peut prendre beaucoup plus de temps à converger."
+  },
+  {
+    "start": 774.9599999999999,
+    "end": 781.36,
+    "text": "Dans l'idée, il vaut mieux avoir la learning rate plus petite et avoir un modèle l'en entraîné mais qui converge"
+  },
+  {
+    "start": 781.36,
+    "end": 785.64,
+    "text": "quand le learning rate trop grand qui empêche la convergence de notre modèle."
+  },
+  {
+    "start": 785.64,
+    "end": 790.64,
+    "text": "C'est fini pour cette vidéo sur la théorie de la régression linéaire."
+  },
+  {
+    "start": 790.64,
+    "end": 794.92,
+    "text": "Vous connaissez maintenant toute la théorie, c'est nécessaire mais pas suffisant"
+  },
+  {
+    "start": 794.92,
+    "end": 798.36,
+    "text": "pour comprendre toutes les subtilités de ce modèle de machine learning."
+  },
+  {
+    "start": 798.36,
+    "end": 803.6,
+    "text": "Sachez que vous pouvez retrouver tous les documents de cette formation via le lien dans la description"
+  },
+  {
+    "start": 803.6,
+    "end": 809.28,
+    "text": "ou directement sur le site et aiforyo.fr avec une version online de la formation."
+  },
+  {
+    "start": 809.28,
+    "end": 814.4399999999999,
+    "text": "Le meilleur moyen de bien comprendre un algorithme et de le coder soit même."
+  },
+  {
+    "start": 814.4399999999999,
+    "end": 817.64,
+    "text": "Et ça tombe bien, car dans la prochaine vidéo de cette formation,"
+  },
+  {
+    "start": 817.64,
+    "end": 823.56,
+    "text": "vous allez implementer From Scratch avec Python tous les concepts vu dans cette vidéo."
+  },
+  {
+    "start": 823.56,
+    "end": 828.76,
+    "text": "On se retrouve dans la prochaine vidéo pour implementer tous ces concepts From Scratch avec Python."
+  },
+  {
+    "start": 828.76,
+    "end": 829.76,
+    "text": "Allez, ciao !"
+  }
+]

@@ -1,0 +1,51 @@
+Logistic regression is a statistical technique that models the probability and event given
+one or more independent variables.
+You'll start with input data that is of any numeric type, but the output variable will
+be binary.
+It'll be zero or one indicating a false or true value respectively.
+You then fit this S-shaped curve called the logistic function to this data.
+It can then be used to make predictions of probability whether or not an event will happen,
+such as given so many hours of rain, what is the probability of a flood.
+Notice how these points can project themselves onto the logistic function and we can use
+maximum likelihood estimation to fit the curve which we'll talk about shortly.
+Notice that there are these middle points where there is a mix of true and false cases.
+If these points follow a transitional trend of increasingly showing an event more likely
+to happen or not happen, you will see that that S-shaped curve will climb or decrease
+respectively.
+We can then leverage it to predict a probability between zero and one.
+Let's take a case where we expect 6.2 inches of rain.
+This is going to result in a 0.75 or 75% probability of a flood.
+If we define a threshold say 0.5 and anything greater than 0.5 will be true, anything less
+than 0.5 will be false.
+We will then predict there will be a flood.
+You can move this threshold based on our needs.
+For example, if we set it to 0.8, this would actually categorize as false and there won't
+be a flood.
+We can also reduce it to say 0.2 and set a much lower barrier to classifying a flood.
+This is the function that produces that S-shaped curve.
+E is Euler's number, which is a special constant.
+That beta 1x plus beta 0 is a linear function.
+That is actually the log odds function.
+That is something we will talk about in another video.
+What's important to know is that this function will produce that S-shaped curve we need to
+make predictions.
+We can also extend this to more input variables to create multi-dimensional logistic regressions
+as shown here.
+Let's talk briefly about maximum likelihood estimation.
+The way it works is that we are going to take each of these points, multiply their corresponding
+likelihoods together, and that is going to produce our total likelihood.
+We need to find the beta coefficients that will maximize the likelihood of our S-shaped
+curve producing all of these points.
+This can be done with gradient descent, Newton's method, and other optimization techniques.
+You might be wondering why did I subtract the false cases from 1.0?
+This is because we have to treat the false cases as positive so that they are maximized
+as well.
+We will cover this on a separate video talking about maximum likelihood estimation in more depth.
+In a separate video, we will talk about how to handle false positives and false negatives,
+and we can use a confusion matrix as a tool to track prediction performance.
+Thank you very much for watching.
+I hope you enjoyed this video.
+If you want to support this channel, please check out my two books, Getting Star With Sequel
+as well as Central Math for Data Science, Chapter 6 of Essential Math for Data Science actually
+covers logistic aggression and classification algorithms in depth.
+Please like, subscribe, and share, and I will see you next time on pre-minute data science.

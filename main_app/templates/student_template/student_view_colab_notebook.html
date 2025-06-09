@@ -1,0 +1,199 @@
+{% extends 'student_template/student_base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ notebook.title }}</h3>
+                <div class="float-right">
+                    <a href="{% url 'student_colab_notebooks' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-info">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="alert alert-info">
+                            <h5><i class="icon fas fa-info"></i> Instructions</h5>
+                            <ol>
+                                <li>Cliquez sur "Dupliquer le Notebook" pour créer votre copie personnelle</li>
+                                <li>Une fois le notebook dupliqué, copiez l'URL et collez-la ci-dessous</li>
+                                <li>Travaillez sur votre copie personnelle du notebook</li>
+                                <li>N'oubliez pas de sauvegarder régulièrement votre travail</li>
+                                <li>Une fois terminé, marquez l'exercice comme complété</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                {% if not progress.personal_colab_url %}
+                                    <form method="post" class="mb-3">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="duplicate">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-copy"></i> Dupliquer le Notebook
+                                        </button>
+                                    </form>
+
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="save_url">
+                                        <div class="form-group">
+                                            <label for="personal_url">URL de votre notebook personnel</label>
+                                            <div class="input-group">
+                                                <input type="url" class="form-control" id="personal_url" name="personal_url" 
+                                                    placeholder="Collez l'URL de votre notebook ici" required>
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fas fa-save"></i> Enregistrer l'URL
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Assurez-vous que l'URL commence par "https://colab.research.google.com/"
+                                            </small>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <div class="mb-3">
+                                        <a href="{{ progress.personal_colab_url }}" target="_blank" class="btn btn-primary">
+                                            <i class="fas fa-external-link-alt"></i> Ouvrir mon Notebook
+                                        </a>
+                                    </div>
+
+                                    <!-- Mise à jour de la progression -->
+                                    <form method="post" class="mb-3">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_progress">
+                                        <div class="form-group">
+                                            <label for="progress">Ma progression</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="progress" name="progress"
+                                                    min="0" max="100" value="{{ progress.progress_percent }}" required>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">%</span>
+                                                    <button type="submit" class="btn btn-info">
+                                                        <i class="fas fa-sync"></i> Mettre à jour
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    {% if not progress.is_completed %}
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="complete">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-check"></i> Marquer comme terminé
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Détails de l'exercice</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Module :</strong> {{ notebook.subject.name }}</p>
+                                <p><strong>Description :</strong> {{ notebook.description }}</p>
+                                <p><strong>Difficulté :</strong> {{ notebook.get_difficulty_display }}</p>
+                                <p><strong>Temps estimé :</strong> {{ notebook.estimated_time }} minutes</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Ma progression</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar {% if progress.is_completed %}bg-success{% else %}bg-warning{% endif %}"
+                                        role="progressbar" style="width: {{ progress.progress_percent }}%">
+                                        {{ progress.progress_percent }}%
+                                    </div>
+                                </div>
+                                <p><strong>Statut :</strong> 
+                                    {% if progress.is_completed %}
+                                        <span class="badge badge-success">Complété</span>
+                                    {% elif progress.progress_percent > 0 %}
+                                        <span class="badge badge-warning">En cours</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Non commencé</span>
+                                    {% endif %}
+                                </p>
+                                {% if progress.completed_date %}
+                                    <p><strong>Terminé le :</strong> {{ progress.completed_date|date:"d/m/Y H:i" }}</p>
+                                {% endif %}
+                                {% if progress.score %}
+                                    <p><strong>Note :</strong> {{ progress.score }}/20</p>
+                                {% endif %}
+                                {% if progress.feedback %}
+                                    <p><strong>Commentaires du professeur :</strong></p>
+                                    <div class="alert alert-info">
+                                        {{ progress.feedback|linebreaks }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        // Mise à jour de l'affichage de la progression
+        $('#progress_percent').on('input', function() {
+            $('#progress_value').text(Math.round($(this).val()));
+        });
+        
+        // Si on marque comme terminé, on met la progression à 100%
+        $('#is_completed').change(function() {
+            if($(this).is(':checked')) {
+                $('#progress_percent').val(100);
+                $('#progress_value').text('100');
+            }
+        });
+        
+        // Si on change la progression à 100%, on coche automatiquement "terminé"
+        $('#progress_percent').change(function() {
+            if($(this).val() == 100) {
+                $('#is_completed').prop('checked', true);
+            }
+        });
+    });
+</script>
+{% endblock %} 

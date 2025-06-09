@@ -1,0 +1,647 @@
+[
+  {
+    "start": 0.0,
+    "end": 3.36,
+    "text": "If you can fit a line, you can fit a squiggle."
+  },
+  {
+    "start": 3.36,
+    "end": 10.24,
+    "text": "If you can make me laugh, you can make me giggle, stat quest."
+  },
+  {
+    "start": 10.24,
+    "end": 13.8,
+    "text": "Hello, I'm Josh Starmer and welcome to StatQuest."
+  },
+  {
+    "start": 13.8,
+    "end": 17.0,
+    "text": "Today, we're going to talk about logistic regression."
+  },
+  {
+    "start": 17.0,
+    "end": 20.6,
+    "text": "This is a technique that can be used for traditional statistics"
+  },
+  {
+    "start": 20.6,
+    "end": 22.240000000000002,
+    "text": "as well as machine learning."
+  },
+  {
+    "start": 22.240000000000002,
+    "end": 24.2,
+    "text": "So let's get right to it."
+  },
+  {
+    "start": 24.2,
+    "end": 26.8,
+    "text": "Before we dive into logistic regression,"
+  },
+  {
+    "start": 26.8,
+    "end": 31.080000000000002,
+    "text": "let's take a step back and review linear regression."
+  },
+  {
+    "start": 31.080000000000002,
+    "end": 35.6,
+    "text": "In another stat quest, we talked about linear regression."
+  },
+  {
+    "start": 35.6,
+    "end": 41.24,
+    "text": "We had some data, weight, and size."
+  },
+  {
+    "start": 41.24,
+    "end": 44.28,
+    "text": "Then we fit a line to it."
+  },
+  {
+    "start": 44.28,
+    "end": 48.64,
+    "text": "And with that line, we could do a lot of things."
+  },
+  {
+    "start": 48.64,
+    "end": 52.28,
+    "text": "First, we could calculate R squared and determine if weight"
+  },
+  {
+    "start": 52.28,
+    "end": 54.480000000000004,
+    "text": "and size are correlated."
+  },
+  {
+    "start": 54.480000000000004,
+    "end": 57.92,
+    "text": "Large values imply a large effect."
+  },
+  {
+    "start": 57.92,
+    "end": 60.88,
+    "text": "And second, calculate a p-value to determine"
+  },
+  {
+    "start": 60.88,
+    "end": 65.44,
+    "text": "if the R squared value is statistically significant."
+  },
+  {
+    "start": 65.44,
+    "end": 71.16,
+    "text": "And third, we could use the line to predict size given weight."
+  },
+  {
+    "start": 71.16,
+    "end": 75.92,
+    "text": "If a new mouse has this weight, then this"
+  },
+  {
+    "start": 75.92,
+    "end": 79.60000000000001,
+    "text": "is the size that we predict from the weight."
+  },
+  {
+    "start": 79.60000000000001,
+    "end": 82.08000000000001,
+    "text": "Although we didn't mention it at the time,"
+  },
+  {
+    "start": 82.08,
+    "end": 84.48,
+    "text": "using data to predict something falls"
+  },
+  {
+    "start": 84.48,
+    "end": 88.6,
+    "text": "under the category of machine learning."
+  },
+  {
+    "start": 88.6,
+    "end": 94.32,
+    "text": "So plain old linear regression is a form of machine learning."
+  },
+  {
+    "start": 94.32,
+    "end": 98.75999999999999,
+    "text": "We also talked a little bit about multiple regression."
+  },
+  {
+    "start": 98.75999999999999,
+    "end": 104.44,
+    "text": "Now we are trying to predict size using weight and blood volume."
+  },
+  {
+    "start": 104.44,
+    "end": 106.56,
+    "text": "Alternatively, we could say that we are"
+  },
+  {
+    "start": 106.56,
+    "end": 111.36,
+    "text": "trying to model size using weight and blood volume."
+  },
+  {
+    "start": 111.36,
+    "end": 113.64,
+    "text": "Multiple regression did the same things"
+  },
+  {
+    "start": 113.64,
+    "end": 116.52,
+    "text": "that normal regression did."
+  },
+  {
+    "start": 116.52,
+    "end": 122.92,
+    "text": "We calculated R squared and we calculated the p-value."
+  },
+  {
+    "start": 122.92,
+    "end": 127.72,
+    "text": "And we could predict size using weight and blood volume."
+  },
+  {
+    "start": 127.72,
+    "end": 131.2,
+    "text": "And this makes multiple regression a slightly fancier machine"
+  },
+  {
+    "start": 131.2,
+    "end": 133.6,
+    "text": "learning method."
+  },
+  {
+    "start": 133.6,
+    "end": 136.96,
+    "text": "We also talked about how we can use discrete measurements"
+  },
+  {
+    "start": 136.96,
+    "end": 140.04,
+    "text": "like genotype to predict size."
+  },
+  {
+    "start": 140.04,
+    "end": 143.4,
+    "text": "If you're not familiar with the term genotype, don't freak out."
+  },
+  {
+    "start": 143.4,
+    "end": 144.76,
+    "text": "It's no big deal."
+  },
+  {
+    "start": 144.76,
+    "end": 149.76,
+    "text": "Just know that it refers to different types of mice."
+  },
+  {
+    "start": 149.76,
+    "end": 154.0,
+    "text": "Lastly, we could compare models."
+  },
+  {
+    "start": 154.0,
+    "end": 157.51999999999998,
+    "text": "So on the left side, we've got normal regression using weight"
+  },
+  {
+    "start": 157.51999999999998,
+    "end": 160.18,
+    "text": "to predict size."
+  },
+  {
+    "start": 160.18,
+    "end": 161.95999999999998,
+    "text": "And we can compare those predictions"
+  },
+  {
+    "start": 161.95999999999998,
+    "end": 164.51999999999998,
+    "text": "to the ones we get from multiple regression"
+  },
+  {
+    "start": 164.51999999999998,
+    "end": 169.35999999999999,
+    "text": "where we're using weight and blood volume to predict size."
+  },
+  {
+    "start": 169.36,
+    "end": 172.32000000000002,
+    "text": "Comparing the simple model to the complicated one"
+  },
+  {
+    "start": 172.32000000000002,
+    "end": 175.4,
+    "text": "tells us if we need to measure weight and blood volume"
+  },
+  {
+    "start": 175.4,
+    "end": 182.04000000000002,
+    "text": "to accurately predict size, or if we can get away with just weight."
+  },
+  {
+    "start": 182.04000000000002,
+    "end": 184.28,
+    "text": "Now that we remember all the cool things"
+  },
+  {
+    "start": 184.28,
+    "end": 189.88000000000002,
+    "text": "we can do with linear regression, let's talk about logistic regression."
+  },
+  {
+    "start": 189.88000000000002,
+    "end": 195.28000000000003,
+    "text": "Logistic regression is similar to linear regression except"
+  },
+  {
+    "start": 195.28,
+    "end": 199.44,
+    "text": "logistic regression predicts whether something is true or false"
+  },
+  {
+    "start": 199.44,
+    "end": 204.36,
+    "text": "instead of predicting something continuous like size."
+  },
+  {
+    "start": 204.36,
+    "end": 211.2,
+    "text": "These mice are obese, and these mice are not."
+  },
+  {
+    "start": 211.2,
+    "end": 214.48,
+    "text": "Also, instead of fitting a line to the data,"
+  },
+  {
+    "start": 214.48,
+    "end": 220.28,
+    "text": "logistic regression fits an S-shaped logistic function."
+  },
+  {
+    "start": 220.28,
+    "end": 224.52,
+    "text": "The curve goes from 0 to 1."
+  },
+  {
+    "start": 224.56,
+    "end": 226.4,
+    "text": "And that means that the curve tells you"
+  },
+  {
+    "start": 226.4,
+    "end": 231.68,
+    "text": "the probability that a mouse is obese based on its weight."
+  },
+  {
+    "start": 231.68,
+    "end": 234.96,
+    "text": "If we weighed a very heavy mouse, there's"
+  },
+  {
+    "start": 234.96,
+    "end": 239.28,
+    "text": "a high probability that the new mouse is obese."
+  },
+  {
+    "start": 239.28,
+    "end": 242.92000000000002,
+    "text": "If we weighed an intermediate mouse,"
+  },
+  {
+    "start": 242.92000000000002,
+    "end": 248.04000000000002,
+    "text": "then there's only a 50% chance that the mouse is obese."
+  },
+  {
+    "start": 248.04000000000002,
+    "end": 250.92000000000002,
+    "text": "Lastly, there's only a small probability"
+  },
+  {
+    "start": 250.92000000000002,
+    "end": 254.32000000000002,
+    "text": "that a light mouse is obese."
+  },
+  {
+    "start": 254.32,
+    "end": 258.8,
+    "text": "Although logistic regression tells the probability that a mouse is obese or not,"
+  },
+  {
+    "start": 258.8,
+    "end": 262.52,
+    "text": "it's usually used for classification."
+  },
+  {
+    "start": 262.52,
+    "end": 268.08,
+    "text": "For example, if the probability a mouse is obese is greater than 50%,"
+  },
+  {
+    "start": 268.08,
+    "end": 275.36,
+    "text": "then we'll classify it as obese, otherwise we'll classify it as not obese."
+  },
+  {
+    "start": 275.36,
+    "end": 279.32,
+    "text": "Just like with linear regression, we can make simple models."
+  },
+  {
+    "start": 279.32,
+    "end": 284.36,
+    "text": "In this case, we can have obesity predicted by weight"
+  },
+  {
+    "start": 284.36,
+    "end": 286.68,
+    "text": "or more complicated models."
+  },
+  {
+    "start": 286.68,
+    "end": 291.6,
+    "text": "In this case, obesity is predicted by weight and genotype."
+  },
+  {
+    "start": 291.6,
+    "end": 297.32,
+    "text": "In this case, obesity is predicted by weight and genotype and age."
+  },
+  {
+    "start": 297.32,
+    "end": 305.24,
+    "text": "And lastly, obesity is predicted by weight, genotype, age, and astrological sign."
+  },
+  {
+    "start": 305.28000000000003,
+    "end": 308.48,
+    "text": "In other words, just like linear regression,"
+  },
+  {
+    "start": 308.48,
+    "end": 313.28000000000003,
+    "text": "logistic regression can work with continuous data, like weight and age,"
+  },
+  {
+    "start": 313.28000000000003,
+    "end": 319.12,
+    "text": "and discrete data, like genotype and astrological sign."
+  },
+  {
+    "start": 319.12,
+    "end": 325.0,
+    "text": "We can also test to see if each variable is useful for predicting obesity."
+  },
+  {
+    "start": 325.0,
+    "end": 330.2,
+    "text": "However, unlike normal regression, we can't easily compare the complicated model"
+  },
+  {
+    "start": 330.2,
+    "end": 335.12,
+    "text": "to the simple model, and we'll talk more about why in a bit."
+  },
+  {
+    "start": 335.12,
+    "end": 339.44,
+    "text": "Instead, we just test to see if a variable's effect on the prediction"
+  },
+  {
+    "start": 339.44,
+    "end": 343.2,
+    "text": "is significantly different from zero."
+  },
+  {
+    "start": 343.2,
+    "end": 349.6,
+    "text": "If not, it means that the variable is not helping the prediction."
+  },
+  {
+    "start": 349.6,
+    "end": 352.68,
+    "text": "We use Wald's test to figure this out."
+  },
+  {
+    "start": 352.68,
+    "end": 356.52,
+    "text": "We'll talk about that in another stack quest."
+  },
+  {
+    "start": 356.52,
+    "end": 362.28000000000003,
+    "text": "In this case, the astrological sign is totes useless."
+  },
+  {
+    "start": 362.28000000000003,
+    "end": 366.40000000000003,
+    "text": "That's statistical jargon for not helping."
+  },
+  {
+    "start": 366.40000000000003,
+    "end": 371.68,
+    "text": "That means we can save time and space in our study by leaving it out."
+  },
+  {
+    "start": 371.68,
+    "end": 375.12,
+    "text": "Logistic regression's ability to provide probabilities"
+  },
+  {
+    "start": 375.12,
+    "end": 379.24,
+    "text": "and classify new samples using continuous and discrete measurements"
+  },
+  {
+    "start": 379.24,
+    "end": 383.24,
+    "text": "makes it a popular machine learning method."
+  },
+  {
+    "start": 383.24,
+    "end": 387.64000000000004,
+    "text": "One big difference between linear regression and logistic regression"
+  },
+  {
+    "start": 387.64000000000004,
+    "end": 391.20000000000005,
+    "text": "is how the line is fit to the data."
+  },
+  {
+    "start": 391.2,
+    "end": 396.84,
+    "text": "With linear regression, we fit the line using least squares."
+  },
+  {
+    "start": 396.84,
+    "end": 404.0,
+    "text": "In other words, we find the line that minimizes the sum of the squares of these residuals."
+  },
+  {
+    "start": 404.0,
+    "end": 407.32,
+    "text": "We also use the residuals to calculate R squared"
+  },
+  {
+    "start": 407.32,
+    "end": 411.84,
+    "text": "and to compare simple models to complicated models."
+  },
+  {
+    "start": 411.84,
+    "end": 415.8,
+    "text": "Logistic regression doesn't have the same concept of a residual"
+  },
+  {
+    "start": 415.8,
+    "end": 421.2,
+    "text": "so it can't use least squares and it can't calculate R squared."
+  },
+  {
+    "start": 421.2,
+    "end": 426.04,
+    "text": "Instead, it uses something called maximum likelihood."
+  },
+  {
+    "start": 426.04,
+    "end": 428.92,
+    "text": "There's a whole stack quest on maximum likelihood."
+  },
+  {
+    "start": 428.92,
+    "end": 432.68,
+    "text": "So see that for details, but in a nutshell,"
+  },
+  {
+    "start": 432.68,
+    "end": 437.24,
+    "text": "you pick a probability scaled by weight of observing an obese mouse"
+  },
+  {
+    "start": 437.24,
+    "end": 440.24,
+    "text": "just like this curve."
+  },
+  {
+    "start": 440.24,
+    "end": 442.68,
+    "text": "And you use that to calculate the likelihood"
+  },
+  {
+    "start": 442.68,
+    "end": 447.88,
+    "text": "of observing a non-obese mouse that weighs this much."
+  },
+  {
+    "start": 447.88,
+    "end": 453.08,
+    "text": "And then you calculate the likelihood of observing this mouse."
+  },
+  {
+    "start": 453.08,
+    "end": 456.64,
+    "text": "And you do that for all of the mice."
+  },
+  {
+    "start": 456.64,
+    "end": 460.76,
+    "text": "And lastly, you multiply all of those likelihoods together."
+  },
+  {
+    "start": 460.76,
+    "end": 466.0,
+    "text": "That's the likelihood of the data given this line."
+  },
+  {
+    "start": 466.0,
+    "end": 471.08,
+    "text": "Then you shift the line and calculate a new likelihood of the data."
+  },
+  {
+    "start": 471.08,
+    "end": 476.44,
+    "text": "And then shift the line and calculate the likelihood again."
+  },
+  {
+    "start": 476.44,
+    "end": 478.91999999999996,
+    "text": "And again."
+  },
+  {
+    "start": 478.91999999999996,
+    "end": 484.88,
+    "text": "Finally, the curve with the maximum value for the likelihood is selected."
+  },
+  {
+    "start": 484.88,
+    "end": 487.32,
+    "text": "Bam!"
+  },
+  {
+    "start": 487.32,
+    "end": 493.28,
+    "text": "In summary, logistic regression can be used to classify samples."
+  },
+  {
+    "start": 493.28,
+    "end": 495.47999999999996,
+    "text": "And it can use different types of data,"
+  },
+  {
+    "start": 495.47999999999996,
+    "end": 501.03999999999996,
+    "text": "like size and or genotype, to do that classification."
+  },
+  {
+    "start": 501.04,
+    "end": 503.88,
+    "text": "And it can also be used to assess what variables"
+  },
+  {
+    "start": 503.88,
+    "end": 506.6,
+    "text": "are useful for classifying samples."
+  },
+  {
+    "start": 506.6,
+    "end": 512.44,
+    "text": "I.e. astrological sign is totes useless."
+  },
+  {
+    "start": 512.44,
+    "end": 513.28,
+    "text": "Hooray!"
+  },
+  {
+    "start": 513.28,
+    "end": 516.6800000000001,
+    "text": "We've made it to the end of another exciting stack quest."
+  },
+  {
+    "start": 516.6800000000001,
+    "end": 520.12,
+    "text": "If you like this stack quest and want to see more, please subscribe."
+  },
+  {
+    "start": 520.12,
+    "end": 522.76,
+    "text": "And if you have suggestions for future stack quests,"
+  },
+  {
+    "start": 522.76,
+    "end": 525.08,
+    "text": "well, put them in the comments below."
+  },
+  {
+    "start": 525.08,
+    "end": 527.2,
+    "text": "Until next time, quest on."
+  }
+]
