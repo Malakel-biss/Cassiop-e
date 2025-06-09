@@ -9,6 +9,16 @@
   border-bottom: 1px solid #dee2e6;
   scroll-behavior: smooth;
 }
+.lesson-video-stretch {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  display: block;
+  background-color: black;
+}
+
 
 /* Chat bubbles */
 .chat-bubble {

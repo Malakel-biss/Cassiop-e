@@ -6,85 +6,79 @@
 {% block page_title %}Détails de la Leçon{% endblock page_title %}
 
 {% block content %}
-<div class="container py-4 align-items-stretch g-3">
-
+<div class="container py-4 g-2">
   <h2 class="mb-4">{{ lecon.name }}</h2>
   <p class="text-muted mb-4"><strong>Description :</strong> {{ lecon.description }}</p>
 
-  <div class="row mb-4 align-items-stretch g-3">
-  <!-- 🎥 VIDEO COLUMN (wider, full height) -->
-  <div class="col-lg-7">
-    <div class="h-100 d-flex flex-column">
-      {% if lecon.video %}
-        <video class="w-100 rounded border" controls style="height: 100%; object-fit: cover;">
-          <source src="{{ lecon.video.url }}" type="video/mp4">
-          Votre navigateur ne supporte pas la lecture vidéo.
-        </video>
+  <!-- 🔧 Adjusted: tighter spacing and height -->
+  <div class="row align-items-stretch g-2 mb-4" style="min-height: 600px;">
+    
+    <!-- 🎥 VIDEO COLUMN (~55% width now) -->
+    <div class="col-lg-7 d-flex align-items-stretch">
+      <div class="w-100 h-100">
+        {% if lecon.video %}
+          <video controls class="lesson-video-stretch">
+            <source src="{{ lecon.video.url }}" type="video/mp4">
+          </video>
+        {% else %}
+          <p class="text-muted">Aucune vidéo disponible.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 🤖 CHATBOT COLUMN (~45%) -->
+    <div class="col-lg-5 d-flex align-items-stretch">
+      <div class="card w-100 d-flex flex-column" style="height: 70%;">
+        <div class="card-header bg-primary text-white">Assistant IA</div>
+
+        <!-- Scrollable Chat Area -->
+        <div id="chat-log" class="flex-grow-1 p-3">
+          <!-- Chat messages go here -->
+        </div>
+
+        <!-- Input Row -->
+        <div class="p-2 border-top bg-white d-flex align-items-center gap-2">
+          <input id="chat-input" class="form-control rounded-pill flex-grow-1" placeholder="Envoyer un message..." />
+          <button onclick="sendLessonChat()" class="btn btn-primary chat-send-btn rounded-pill">Envoyer</button>
+          <button id="record-btn" class="btn btn-danger rounded-pill" 
+                  onmousedown="startRecording()" 
+                  onmouseup="stopRecording()">Record</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-center flex-wrap my-4" style="gap: 3rem;">
+  <!-- 📄 PDF + Notes Column (~30%) -->
+  <div style="flex: 0 0 30%;" class="card shadow-sm">
+    <div class="card-header">📄 Document PDF</div>
+    <div class="card-body">
+      {% if lecon.pdf %}
+        <a href="{{ lecon.pdf.url }}" target="_blank" class="btn btn-outline-primary mb-2">Télécharger le PDF</a>
       {% else %}
-        <p class="text-muted">Aucune vidéo disponible.</p>
+        <p class="text-muted">Aucun document disponible.</p>
       {% endif %}
+      <p class="text-muted mb-3">Ce document accompagne la leçon pour vous aider à mieux comprendre.</p>
+
+      <h6 class="mt-4">📝 Notes</h6>
+      <textarea class="form-control" rows="5" placeholder="Écrivez vos notes ici..."></textarea>
     </div>
   </div>
 
-  <!-- 🤖 CHATBOT COLUMN (slimmer, full height) -->
-  <div class="col-lg-5">
-    <div class="card shadow-sm h-100 d-flex flex-column">
-      <div class="card-header bg-primary text-white">Assistant IA</div>
-      <div class="card-body d-flex flex-column p-0">
-        <!-- 💬 Chat messages -->
-        <div id="chat-log" class="flex-grow-1 p-3 overflow-auto" style="max-height: 400px; background: #f8f9fa;">
-          <!-- Chat messages inserted dynamically -->
-        </div>
-            
-  <div class="p-2 border-top bg-white d-flex align-items-center gap-2">
-    <input id="chat-input" class="form-control rounded-pill px-4 py-3 flex-grow-1" placeholder="Envoyer un message..." />
-    <button onclick="sendLessonChat()" class="btn btn-primary px-4 py-3 rounded-pill">Envoyer</button>
-    <button id="record-btn" class="btn btn-danger btn-lg px-4 fw-bold" 
-            onmousedown="startRecording()" 
-            onmouseup="stopRecording()">Record</button>
-  </div>
-
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <div class="card border shadow-sm">
-        <div class="card-header">Document PDF</div>
-        <div class="card-body">
-          {% if lecon.pdf %}
-            <a href="{{ lecon.pdf.url }}" target="_blank" class="btn btn-outline-primary">📄 Télécharger</a>
-          {% else %}
-            <p class="text-muted">Aucun document disponible.</p>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4 d-flex flex-column gap-4">
-      <div class="card shadow-sm">
-        <div class="card-header">📝 Notes</div>
-        <div class="card-body">
-          <textarea class="form-control" rows="6" placeholder="Écrivez vos notes ici..."></textarea>
-        </div>
-      </div>
-
-      <div class="card shadow-sm">
-        <div class="card-header bg-warning">🎯 Quiz</div>
-        <div class="card-body">
-          <button class="btn btn-warning w-100 mb-3" onclick="generateQuiz()">Générer un Quiz</button>
-          <div id="quiz-output" class="d-flex flex-column gap-3"></div>
-        </div>
+  <!-- 🎯 Quiz Column (~50%) -->
+  <div style="flex: 0 0 50%;" class="card shadow-sm">
+    <div class="card-header bg-warning">🎯 Quiz</div>
+    <div class="card-body d-flex flex-column">
+      <button class="btn btn-warning w-100 mb-3" onclick="generateQuiz()">Générer un Quiz</button>
+      <div id="quiz-output" class="text-muted text-center py-4">
+        <p class="m-0">🧠 Ce quiz vous aidera à tester votre compréhension après la leçon.</p>
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}
+
 
 {% block custom_js %}
 <script>

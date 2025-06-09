@@ -20,3 +20,4 @@ gTTS==2.3.2
 torch
 ctranslate2
 djangorestframework
+django-pdf-view
